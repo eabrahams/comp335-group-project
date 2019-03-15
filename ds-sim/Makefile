@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g -O1
+CFLAGS=-Wall -g -Og
 
 all: server client
 
