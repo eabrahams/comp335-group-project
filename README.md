@@ -1,7 +1,11 @@
 # comp335-group-project
-repo for university assignment
-Current Group:
+Repo for Macquarie University COMP335 Assignment
+
+Developers:
+
 Ellis Abrahams (eabrahams)
-Md Armam Hassan
-Jonathan Stacey
+
+Jonathan Stacey (Ourous)
+
+Md Armam Hassan (emoxeon)
 
