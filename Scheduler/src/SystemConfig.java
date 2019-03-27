@@ -16,6 +16,18 @@ public final class SystemConfig {
         final int    memory;
         final int    disk;
         
+        /**
+         * Instantiates and validates a ServerType, describing a set of instanced resources
+         *
+         * @param name       the name of the server type
+         * @param limit      a non-negative integer indicating how many can coexist
+         * @param bootTime   a non-negative integer indicating how long it takes to start an instance
+         * @param hourlyRate a non-negative rational number representing the cost of running an instance for an hour
+         * @param coreCount  a positive integer representing how many cores the server type offers
+         * @param memory     a positive integer representing how much memory the server type offers
+         * @param disk       a positive integer representing how much disk the server type offers
+         * @throws IllegalArgumentException when any of the arguments fail to meet the specified criteria
+         */
         public ServerType(String name, int limit, int bootTime, float hourlyRate, int coreCount, int memory, int disk)
         throws IllegalArgumentException {
             if(name == null) throw new NullPointerException("`name` cannot be null");
@@ -36,6 +48,12 @@ public final class SystemConfig {
             this.disk = disk;
         }
         
+        /**
+         * Instantiates a ServerType from an XML Element, used internally for parsing
+         *
+         * @param element an XML element
+         * @throws IllegalArgumentException when the element does not represent a valid server type
+         */
         private ServerType(Element element)
         throws IllegalArgumentException {
             this(element.getAttribute("type"),
@@ -75,6 +93,12 @@ public final class SystemConfig {
     
     public final Collection<ServerType> serverTypes = new ArrayList<>();
     
+    /**
+     * Instantiates a SystemConfig from an XML Document, performing validation
+     *
+     * @param doc the XML Document
+     * @throws IllegalArgumentException when the document does not represent a valid system configuration
+     */
     public SystemConfig(Document doc)
     throws IllegalArgumentException {
         if(doc == null) throw new NullPointerException("`doc` cannot be null");
@@ -89,10 +113,9 @@ public final class SystemConfig {
             Node node = nodes.item(i);
             switch(node.getNodeType()) {
                 case Node.ELEMENT_NODE:
-                    Element element = (Element) node;
-                    String nodeName = element.getNodeName();
+                    String nodeName = node.getNodeName();
                     if(nodeName.equals("servers")) {
-                        NodeList servers = element.getChildNodes();
+                        NodeList servers = node.getChildNodes();
                         for(int j = 0; j < servers.getLength(); ++j) {
                             Node server = servers.item(j);
                             switch(server.getNodeType()) {
@@ -126,6 +149,14 @@ public final class SystemConfig {
         }
     }
     
+    /**
+     * Instantiates a SystemConfig from a file containing an XML Document, performing validation
+     *
+     * @param file the file containing an XML Document
+     * @return a valid system configuration
+     * @throws IOException              when there was a problem reading the file
+     * @throws IllegalArgumentException when the file does not represent a valid system configuration
+     */
     public static SystemConfig fromFile(File file)
     throws IOException, IllegalArgumentException {
         try {
@@ -138,6 +169,14 @@ public final class SystemConfig {
         }
     }
     
+    /**
+     * Instantiates a SystemConfig from a stream containing an XML Document, performing validation
+     *
+     * @param stream the stream containing the XML document
+     * @return a valid system configuration
+     * @throws IOException              when there was a problem reading from the stream
+     * @throws IllegalArgumentException when the stream does not represent a valid system configuration
+     */
     public static SystemConfig fromStream(InputStream stream)
     throws IOException, IllegalArgumentException {
         try {
@@ -150,6 +189,13 @@ public final class SystemConfig {
         }
     }
     
+    /**
+     * Instantiates a SystemConfig from a string containing an XML Document, performing validation
+     *
+     * @param str the string containing the XML Document
+     * @return a valid system configuration
+     * @throws IllegalArgumentException when the string does not represent a valid system configuration
+     */
     public static SystemConfig fromString(String str)
     throws IllegalArgumentException {
         try {
