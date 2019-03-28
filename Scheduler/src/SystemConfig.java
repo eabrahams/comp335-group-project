@@ -150,26 +150,6 @@ public final class SystemConfig {
     }
     
     /**
-     * Instantiates a SystemConfig from a file containing an XML Document, performing validation
-     *
-     * @param file the file containing an XML Document
-     * @return a valid system configuration
-     * @throws IOException              when there was a problem reading the file
-     * @throws IllegalArgumentException when the file does not represent a valid system configuration
-     */
-    public static SystemConfig fromFile(File file)
-    throws IOException, IllegalArgumentException {
-        try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-            return new SystemConfig(doc);
-        } catch(ParserConfigurationException e) {
-            throw new RuntimeException("Default parser configuration failed!", e);
-        } catch(SAXException e) {
-            throw new IllegalArgumentException("Invalid XML format", e);
-        }
-    }
-    
-    /**
      * Instantiates a SystemConfig from a stream containing an XML Document, performing validation
      *
      * @param stream the stream containing the XML document
@@ -183,10 +163,39 @@ public final class SystemConfig {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
             return new SystemConfig(doc);
         } catch(ParserConfigurationException e) {
+            // should never happen because we use the default configuration
             throw new RuntimeException("Default parser configuration failed!", e);
         } catch(SAXException e) {
             throw new IllegalArgumentException("Invalid XML format", e);
         }
+    }
+    
+    /**
+     * Instantiates a SystemConfig from a file containing an XML Document, performing validation
+     *
+     * @param file the file containing an XML Document
+     * @return a valid system configuration
+     * @throws IOException              when there was a problem reading the file
+     * @throws IllegalArgumentException when the file does not represent a valid system configuration
+     */
+    public static SystemConfig fromFile(File file)
+    throws IOException, IllegalArgumentException {
+        InputStream stream = new FileInputStream(file);
+        return SystemConfig.fromStream(stream);
+    }
+    
+    /**
+     * Instantiates a SystemConfig from a file containing an XML Document, performing validation
+     *
+     * @param path the path to a containing an XML Document
+     * @return a valid system configuration
+     * @throws IOException              when there was a problem reading the file
+     * @throws IllegalArgumentException when the file does not represent a valid system configuration
+     */
+    public static SystemConfig fromFile(String path)
+    throws IOException, IllegalArgumentException {
+        InputStream stream = new FileInputStream(new File(path));
+        return SystemConfig.fromStream(stream);
     }
     
     /**
@@ -202,6 +211,7 @@ public final class SystemConfig {
             InputStream stream = new ByteArrayInputStream(str.getBytes());
             return SystemConfig.fromStream(stream);
         } catch(IOException e) {
+            // should never happen because we aren't really doing IO
             throw new RuntimeException("Could not process IO on String!", e);
         }
     }
