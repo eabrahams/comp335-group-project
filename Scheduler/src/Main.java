@@ -35,5 +35,5 @@ public class Main {
 		
 		System.out.println("\n\nSUCCESS");
 	}
-
 }
+

@@ -18,23 +18,31 @@ public class SocketConnection {
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		} catch(IOException error) {
 			System.out.println(error);
+			System.exit(1);
 		}
 	}
 	
 	/* Send message, expecting a response. Return response. */
 	public String sendMessage(String msg) {
-		out.print(msg);
-		out.flush();
-		System.out.println("send: " + msg);
+		// Send message
+		out.print(msg); // send characters
+		out.flush(); // terminate message
+		System.out.println("sent: " + msg);
+
+		// Receive response
 		StringBuffer sb = new StringBuffer();
 		char[] buf = new char[1024];
+		int length = 0;
 		try {
-			in.read(buf);
+			length = in.read(buf);
 		} catch(IOException error) {
 			System.err.println(error);
 			System.exit(1);
 		}
-		sb.append(buf);
-		return sb.toString().trim();
+		sb.append(buf, 0, length);
+		//String result = sb.toString().trim();
+		String result = sb.toString();
+		System.out.println("received: " + result);
+		return result;
 	}
 }
