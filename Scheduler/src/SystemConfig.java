@@ -139,6 +139,23 @@ public final class SystemConfig {
         public int getAvailableDisk() {
             return availableDisk;
         }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if(this == obj) {
+                return true;
+            } else if(obj instanceof ServerInfo) {
+                ServerInfo other = (ServerInfo) obj;
+                return this.type == other.type && this.id == other.id;
+            } else {
+                return false;
+            }
+        }
+        
+        @Override
+        public int hashCode() {
+            return this.type.hashCode() ^ id;
+        }
     }
     
     
