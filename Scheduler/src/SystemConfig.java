@@ -12,7 +12,7 @@ public final class SystemConfig {
         final int    limit;
         final int    bootTime;
         final float  hourlyRate;
-        final int    coreCount;
+        final int    cores;
         final int    memory;
         final int    disk;
         
@@ -23,12 +23,12 @@ public final class SystemConfig {
          * @param limit      a non-negative integer indicating how many can coexist
          * @param bootTime   a non-negative integer indicating how long it takes to start an instance
          * @param hourlyRate a non-negative rational number representing the cost of running an instance for an hour
-         * @param coreCount  a positive integer representing how many cores the server type offers
+         * @param cores      a positive integer representing how many cores the server type offers
          * @param memory     a positive integer representing how much memory the server type offers
          * @param disk       a positive integer representing how much disk the server type offers
          * @throws IllegalArgumentException when any of the arguments fail to meet the specified criteria
          */
-        public ServerType(String name, int limit, int bootTime, float hourlyRate, int coreCount, int memory, int disk)
+        private ServerType(String name, int limit, int bootTime, float hourlyRate, int cores, int memory, int disk)
         throws IllegalArgumentException {
             if(name == null) throw new NullPointerException("`name` cannot be null");
             if(limit < 0) throw new IllegalArgumentException("`limit` cannot be negative");
@@ -36,14 +36,14 @@ public final class SystemConfig {
             if(hourlyRate < 0.0 || Float.isNaN(hourlyRate) || Float.isInfinite(hourlyRate)) {
                 throw new IllegalArgumentException("`hourlyRate` must be a non-negative rational number");
             }
-            if(coreCount <= 0) throw new IllegalArgumentException("`coreCount` must be positive");
+            if(cores <= 0) throw new IllegalArgumentException("`coreCount` must be positive");
             if(memory <= 0) throw new IllegalArgumentException("`memory` must be positive");
             if(disk <= 0) throw new IllegalArgumentException("`disk` must be positive");
             this.name = name;
             this.limit = limit;
             this.bootTime = bootTime;
             this.hourlyRate = hourlyRate;
-            this.coreCount = coreCount;
+            this.cores = cores;
             this.memory = memory;
             this.disk = disk;
         }
@@ -76,7 +76,7 @@ public final class SystemConfig {
                        && this.limit == other.limit
                        && this.bootTime == other.bootTime
                        && this.hourlyRate == other.hourlyRate
-                       && this.coreCount == other.coreCount
+                       && this.cores == other.cores
                        && this.memory == other.memory
                        && this.disk == other.disk;
             } else {
@@ -86,12 +86,64 @@ public final class SystemConfig {
         
         @Override
         public int hashCode() {
-            return name.hashCode() ^ limit ^ bootTime ^ Float.hashCode(hourlyRate) ^ coreCount ^ memory ^ disk;
+            return name.hashCode() ^ limit ^ bootTime ^ Float.hashCode(hourlyRate) ^ cores ^ memory ^ disk;
         }
     }
     
     
-    public final Collection<ServerType> serverTypes = new ArrayList<>();
+    public final class ServerInfo {
+        final   ServerType type;
+        final   int        id;
+        private int        availableCores;
+        private int        availableMemory;
+        private int        availableDisk;
+        
+        private ServerInfo(ServerType type, int id) {
+            this.type = type;
+            this.id = id;
+            this.availableCores = type.cores;
+            this.availableMemory = type.memory;
+            this.availableDisk = type.disk;
+        }
+        
+        public void releaseResources(int cores, int memory, int disk) {
+            if(cores >= 0) availableCores = Math.min(availableCores + cores, type.cores);
+            if(memory >= 0) availableMemory = Math.min(availableMemory + memory, type.memory);
+            if(disk >= 0) availableDisk = Math.min(availableDisk + disk, type.disk);
+        }
+        
+        public boolean tryReserveResources(int cores, int memory, int disk) {
+            if(0 <= cores
+               && cores <= availableCores
+               && 0 <= memory
+               && memory <= availableMemory
+               && 0 <= disk
+               && disk <= availableDisk) {
+                availableCores -= cores;
+                availableMemory -= memory;
+                availableDisk -= disk;
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        public int getAvailableCores() {
+            return availableCores;
+        }
+        
+        public int getAvailableMemory() {
+            return availableMemory;
+        }
+        
+        public int getAvailableDisk() {
+            return availableDisk;
+        }
+    }
+    
+    
+    public final Collection<ServerType> serverTypes;
+    public final Collection<ServerInfo> servers;
     
     /**
      * Instantiates a SystemConfig from an XML Document, performing validation
@@ -109,6 +161,7 @@ public final class SystemConfig {
             ));
         }
         NodeList nodes = root.getChildNodes();
+        Collection<ServerType> serverTypes = new ArrayList<>();
         for(int i = 0; i < nodes.getLength(); ++i) {
             Node node = nodes.item(i);
             switch(node.getNodeType()) {
@@ -147,6 +200,14 @@ public final class SystemConfig {
                     throw new IllegalArgumentException("Unexpected node type under 'system'");
             }
         }
+        this.serverTypes = Collections.unmodifiableCollection(serverTypes);
+        Collection<ServerInfo> servers = new ArrayList<>();
+        for(ServerType type : serverTypes) {
+            for(int i = 0; i < type.limit; ++i) {
+                servers.add(new ServerInfo(type, i));
+            }
+        }
+        this.servers = Collections.unmodifiableCollection(servers);
     }
     
     /**
