@@ -26,27 +26,32 @@ public class SocketConnection {
 		this(DEFAULT_PORT, LOCALHOST);
 	}
 
-	/* Send message, expecting a response. Return response. */
-	public String sendMessage(String msg) {
+	/* Send message over socket */
+	public void sendMessage(String msg) {
 		// Send message
 		out.print(msg); // send characters
 		out.flush(); // terminate message
 		System.out.println("sent: " + msg);
+	}
 
-		// Receive response
+	/* receive (usually response) message over socket */
+	public String receiveMessage() {
 		StringBuffer sb = new StringBuffer();
 		char[] buf = new char[1024];
 		int length = 0;
 		try {
 			length = in.read(buf);
-		} catch(IOException error) {
+		} catch (IOException error) {
 			System.err.println(error);
-			System.exit(1);
 		}
 		sb.append(buf, 0, length);
-		//String result = sb.toString().trim();
 		String result = sb.toString();
 		System.out.println("received: " + result);
 		return result;
+	}
+
+	public boolean messageResponse(String message, String expectedResponse) {
+		sendMessage(message);
+		return expectedResponse.equals(receivedMessage());
 	}
 }
