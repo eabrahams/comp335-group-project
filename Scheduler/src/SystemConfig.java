@@ -91,12 +91,19 @@ public final class SystemConfig {
     }
     
     
+    enum ServerState {
+        Offline, Starting, Idle, Active, Unavailable
+    }
+    
+    
     public final class ServerInfo {
-        final   ServerType type;
-        final   int        id;
-        private int        availableCores;
-        private int        availableMemory;
-        private int        availableDisk;
+        final   ServerType  type;
+        final   int         id;
+        private ServerState state = ServerState.Offline;
+        private int         availableTime;
+        private int         availableCores;
+        private int         availableMemory;
+        private int         availableDisk;
         
         private ServerInfo(ServerType type, int id) {
             this.type = type;
@@ -126,6 +133,60 @@ public final class SystemConfig {
             } else {
                 return false;
             }
+        }
+        
+        /**
+         * Updates a ServerInfo in-place with a new internal state
+         *
+         * @param state  the new state
+         * @param time   the new available time
+         * @param cores  the new available cores
+         * @param memory the new available memory
+         * @param disk   the new available disk space
+         * @return the updated ServerInfo, for method chaining
+         * @throws IllegalArgumentException when the arguments are negative or outside the capacity of the server type
+         */
+        public ServerInfo update(ServerState state, int time, int cores, int memory, int disk)
+        throws IllegalArgumentException {
+            if(time < 0 || cores < 0 || memory < 0 || disk < 0) {
+                throw new IllegalArgumentException("All arguments must be non-negative");
+            } else if(cores > type.cores || memory > type.memory || disk > type.disk) {
+                throw new IllegalArgumentException("Arguments must be within capacity of server type");
+            } else {
+                this.state = state;
+                availableTime = time;
+                availableCores = cores;
+                availableMemory = memory;
+                availableDisk = disk;
+            }
+            return this;
+        }
+        
+        /**
+         * Attempt to update a ServerInfo in-place
+         *
+         * @param state  the new state
+         * @param time   the new available time
+         * @param cores  the new available cores
+         * @param memory the new available memory
+         * @param disk   the new available disk space
+         * @return whether the update succeeded or not
+         */
+        public boolean tryUpdate(ServerState state, int time, int cores, int memory, int disk) {
+            try {
+                update(state, time, cores, memory, disk);
+                return true;
+            } catch(IllegalArgumentException e) {
+                return false;
+            }
+        }
+        
+        public ServerState getState() {
+            return state;
+        }
+        
+        public int getAvailableTime() {
+            return availableTime;
         }
         
         public int getAvailableCores() {
@@ -159,8 +220,8 @@ public final class SystemConfig {
     }
     
     
-    public final Collection<ServerType> serverTypes;
-    public final Collection<ServerInfo> servers;
+    private final Map<String, ServerType>           serverTypes;
+    private final Map<ServerType, List<ServerInfo>> servers;
     
     /**
      * Instantiates a SystemConfig from an XML Document, performing validation
@@ -178,7 +239,7 @@ public final class SystemConfig {
             ));
         }
         NodeList nodes = root.getChildNodes();
-        Collection<ServerType> serverTypes = new ArrayList<>();
+        Map<String, ServerType> serverTypes = new HashMap<>();
         for(int i = 0; i < nodes.getLength(); ++i) {
             Node node = nodes.item(i);
             switch(node.getNodeType()) {
@@ -191,7 +252,8 @@ public final class SystemConfig {
                             switch(server.getNodeType()) {
                                 case Node.ELEMENT_NODE:
                                     if(server.getNodeName().equals("server")) {
-                                        serverTypes.add(new ServerType((Element) server));
+                                        ServerType type = new ServerType((Element) server);
+                                        serverTypes.put(type.name, type);
                                     } else {
                                         throw new IllegalArgumentException(String.format(
                                                 "Unexpected element '%s' under 'servers'",
@@ -217,14 +279,14 @@ public final class SystemConfig {
                     throw new IllegalArgumentException("Unexpected node type under 'system'");
             }
         }
-        this.serverTypes = Collections.unmodifiableCollection(serverTypes);
-        Collection<ServerInfo> servers = new ArrayList<>();
-        for(ServerType type : serverTypes) {
-            for(int i = 0; i < type.limit; ++i) {
-                servers.add(new ServerInfo(type, i));
-            }
+        this.serverTypes = Collections.unmodifiableMap(serverTypes);
+        Map<ServerType, List<ServerInfo>> servers = new HashMap<>();
+        for(ServerType type : serverTypes.values()) {
+            List<ServerInfo> group = new ArrayList<>(type.limit);
+            for(int i = 0; i < type.limit; ++i) group.add(new ServerInfo(type, i));
+            servers.put(type, Collections.unmodifiableList(group));
         }
-        this.servers = Collections.unmodifiableCollection(servers);
+        this.servers = Collections.unmodifiableMap(servers);
     }
     
     /**
@@ -272,8 +334,7 @@ public final class SystemConfig {
      */
     public static SystemConfig fromFile(String path)
     throws IOException, IllegalArgumentException {
-        InputStream stream = new FileInputStream(new File(path));
-        return SystemConfig.fromStream(stream);
+        return SystemConfig.fromFile(new File(path));
     }
     
     /**
@@ -292,5 +353,56 @@ public final class SystemConfig {
             // should never happen because we aren't really doing IO
             throw new RuntimeException("Could not process IO on String!", e);
         }
+    }
+    
+    /**
+     * Get an unmodifiable collection of server types
+     *
+     * @return the server types
+     */
+    public Collection<ServerType> getServerTypes() {
+        return Collections.unmodifiableCollection(serverTypes.values());
+    }
+    
+    /**
+     * Get a server type matching a name
+     *
+     * @param name the name of the type
+     * @return the server type
+     */
+    public ServerType getServerType(String name) {
+        return serverTypes.get(name);
+    }
+    
+    /**
+     * Get an unmodifiable collection of all servers
+     *
+     * @return the servers
+     */
+    public Collection<ServerInfo> getServers() {
+        Collection<ServerInfo> temp = new ArrayList<>();
+        for(List<ServerInfo> group : servers.values()) temp.addAll(group);
+        return Collections.unmodifiableCollection(temp);
+    }
+    
+    /**
+     * Get an unmodifiable list of servers with a specific type
+     *
+     * @param type the server type
+     * @return the servers with that type
+     */
+    public List<ServerInfo> getServers(ServerType type) {
+        return servers.get(type);
+    }
+    
+    /**
+     * Get a specific server by type and id
+     *
+     * @param type the server type
+     * @param id   the server's id
+     * @return the server
+     */
+    public ServerInfo getServer(ServerType type, int id) {
+        return servers.get(type).get(id);
     }
 }
