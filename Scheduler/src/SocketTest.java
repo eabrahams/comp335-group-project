@@ -1,5 +1,5 @@
 
-public class Main {
+public class SocketTest {
 	private static boolean testResponse(String response, String expected) {
 		if (!response.contentEquals(expected)) {
 			System.err.println("bad response from server: " + response);
