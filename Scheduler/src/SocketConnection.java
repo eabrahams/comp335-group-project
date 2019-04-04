@@ -23,7 +23,7 @@ public class SocketConnection {
 	}
 
 	public SocketConnection() {
-		this(DEFAULT_PORT, LOCALHOST);
+		this(LOCALHOST, DEFAULT_PORT);
 	}
 
 	/* Send message over socket */
@@ -52,6 +52,6 @@ public class SocketConnection {
 
 	public boolean messageResponse(String message, String expectedResponse) {
 		sendMessage(message);
-		return expectedResponse.equals(receivedMessage());
+		return expectedResponse.equals(receiveMessage());
 	}
 }
