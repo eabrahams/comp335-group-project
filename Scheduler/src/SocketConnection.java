@@ -11,9 +11,9 @@ public class SocketConnection {
 	private BufferedReader in;
 	
 	/* Opens a connection to a (hopefully) existing socket */
-	public SocketConnection() {
+	public SocketConnection(String host, int port) {
 		try {
-			clientSocket = new Socket(LOCALHOST, DEFAULT_PORT);
+			clientSocket = new Socket(host, port);
 			out = new PrintWriter(clientSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		} catch(IOException error) {
@@ -21,7 +21,11 @@ public class SocketConnection {
 			System.exit(1);
 		}
 	}
-	
+
+	public SocketConnection() {
+		this(DEFAULT_PORT, LOCALHOST);
+	}
+
 	/* Send message, expecting a response. Return response. */
 	public String sendMessage(String msg) {
 		// Send message
