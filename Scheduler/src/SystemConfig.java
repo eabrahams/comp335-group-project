@@ -92,7 +92,24 @@ public final class SystemConfig {
     
     
     enum ServerState {
-        Offline, Starting, Idle, Active, Unavailable
+        Offline, Starting, Idle, Active, Unavailable;
+        
+        public static ServerState valueOf(int state) {
+            switch(state) {
+                case 0:
+                    return Offline;
+                case 1:
+                    return Starting;
+                case 2:
+                    return Idle;
+                case 3:
+                    return Active;
+                case 4:
+                    return Unavailable;
+                default:
+                    throw new IllegalArgumentException(String.format("%d does not map to a ServerState value", state));
+            }
+        }
     }
     
     
