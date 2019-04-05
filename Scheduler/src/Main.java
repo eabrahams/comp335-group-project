@@ -6,7 +6,7 @@ public class Main {
     throws Exception {
         // testing
         SystemConfig config = SystemConfig.fromFile(new File("test-data/system.xml"));
-        System.out.println(config.serverTypes.size());
+        System.out.println(config.getServerTypes().size());
     }
 
 	private static SocketConnection initClient() {
