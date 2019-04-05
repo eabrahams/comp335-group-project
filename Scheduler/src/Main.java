@@ -30,7 +30,7 @@ public class Main {
 
 		while (true) {
 			client.sendMessage("REDY");
-			String[] response = client.receiveMessage();
+			String response = client.receiveMessage();
 			String[] jobData = response.split(" ");
 			if (!jobData[0].equals("JOBN")) {
 				if (!response.equals("NONE")) {
