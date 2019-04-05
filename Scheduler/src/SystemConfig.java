@@ -11,7 +11,7 @@ public final class SystemConfig {
         final String name;
         final int    limit;
         final int    bootTime;
-        final float  hourlyRate;
+        final float  rate;
         final int    cores;
         final int    memory;
         final int    disk;
@@ -22,27 +22,27 @@ public final class SystemConfig {
          * @param name       the name of the server type
          * @param limit      a non-negative integer indicating how many can coexist
          * @param bootTime   a non-negative integer indicating how long it takes to start an instance
-         * @param hourlyRate a non-negative rational number representing the cost of running an instance for an hour
+         * @param rate a non-negative rational number representing the cost of running an instance for an hour
          * @param cores      a positive integer representing how many cores the server type offers
          * @param memory     a positive integer representing how much memory the server type offers
          * @param disk       a positive integer representing how much disk the server type offers
          * @throws IllegalArgumentException when any of the arguments fail to meet the specified criteria
          */
-        private ServerType(String name, int limit, int bootTime, float hourlyRate, int cores, int memory, int disk)
+        private ServerType(String name, int limit, int bootTime, float rate, int cores, int memory, int disk)
         throws IllegalArgumentException {
             if(name == null) throw new NullPointerException("`name` cannot be null");
             if(limit < 0) throw new IllegalArgumentException("`limit` cannot be negative");
             if(bootTime < 0) throw new IllegalArgumentException("`bootTime` cannot be negative");
-            if(hourlyRate < 0.0 || Float.isNaN(hourlyRate) || Float.isInfinite(hourlyRate)) {
-                throw new IllegalArgumentException("`hourlyRate` must be a non-negative rational number");
+            if(rate < 0.0 || Float.isNaN(rate) || Float.isInfinite(rate)) {
+                throw new IllegalArgumentException("`rate` must be a non-negative rational number");
             }
-            if(cores <= 0) throw new IllegalArgumentException("`coreCount` must be positive");
+            if(cores <= 0) throw new IllegalArgumentException("`cores` must be positive");
             if(memory <= 0) throw new IllegalArgumentException("`memory` must be positive");
             if(disk <= 0) throw new IllegalArgumentException("`disk` must be positive");
             this.name = name;
             this.limit = limit;
             this.bootTime = bootTime;
-            this.hourlyRate = hourlyRate;
+            this.rate = rate;
             this.cores = cores;
             this.memory = memory;
             this.disk = disk;
@@ -59,7 +59,7 @@ public final class SystemConfig {
             this(element.getAttribute("type"),
                  Integer.parseInt(element.getAttribute("limit")),
                  Integer.parseInt(element.getAttribute("bootupTime")),
-                 Float.parseFloat(element.getAttribute("hourlyRate")),
+                 Float.parseFloat(element.getAttribute("rate")),
                  Integer.parseInt(element.getAttribute("coreCount")),
                  Integer.parseInt(element.getAttribute("memory")),
                  Integer.parseInt(element.getAttribute("disk"))
@@ -75,7 +75,7 @@ public final class SystemConfig {
                 return this.name.equals(other.name)
                        && this.limit == other.limit
                        && this.bootTime == other.bootTime
-                       && this.hourlyRate == other.hourlyRate
+                       && this.rate == other.rate
                        && this.cores == other.cores
                        && this.memory == other.memory
                        && this.disk == other.disk;
@@ -86,7 +86,7 @@ public final class SystemConfig {
         
         @Override
         public int hashCode() {
-            return name.hashCode() ^ limit ^ bootTime ^ Float.hashCode(hourlyRate) ^ cores ^ memory ^ disk;
+            return name.hashCode() ^ limit ^ bootTime ^ Float.hashCode(rate) ^ cores ^ memory ^ disk;
         }
     }
     
