@@ -20,7 +20,7 @@ public class Main {
 	public static void allToLargest(SocketConnection client) {
 		SystemConfig config;
 		try {
-			config = SystemConfig.fromFile(new File("system.xml"));
+			config = SystemConfig.fromFile(new File("./system.xml"));
 		} catch (IOException e) {
 			System.err.println(e);
 			return;
