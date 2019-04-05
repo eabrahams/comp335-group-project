@@ -11,11 +11,12 @@ Jonathan Stacey (Ourous)
 
 Armam Hassan (emoxeon)
 
-# Stage 1
+## Stage 1
+This stage implements the allToLargest algorithm.
 
-# Build
-javac Main.java
+### Build
+`$ javac Main.java`
 
-# Run (with server running)
-java Main
+### Run (with server running)
+`$ java Main`
 
