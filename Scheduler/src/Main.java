@@ -25,7 +25,8 @@ public class Main {
 			System.err.println(e);
 			return;
 		}
-		SystemConfig.ServerType largest = Collections.max(config.serverTypes, Comparator.comparing(s -> s.cores));
+
+		SystemConfig.ServerType largest = Collections.max(config.getServerTypes(), Comparator.comparing(s -> s.cores));
 		client.sendMessage("REDY");
 
 		while (true) {
