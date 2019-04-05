@@ -27,12 +27,15 @@ public class Main {
 		}
 
 		SystemConfig.ServerType largest = Collections.max(config.getServerTypes(), Comparator.comparing(s -> s.cores));
-		client.sendMessage("REDY");
 
 		while (true) {
-			String[] jobData = client.receiveMessage().split(" ");
+			client.sendMessage("REDY");
+			String[] response = client.receiveMessage();
+			String[] jobData = response.split(" ");
 			if (!jobData[0].equals("JOBN")) {
-				System.err.println("Bad job string: " + String.join(" ", jobData));
+				if (!response.equals("NONE")) {
+					System.err.println("Bad job string: " + String.join(" ", jobData));
+				}
 				break;
 			}
 
@@ -42,8 +45,9 @@ public class Main {
 			sj.add(largest.name);
 			sj.add("0");
 			client.sendMessage(sj.toString());
-			if (!client.receiveMessage().equals("OK"))
+			if (!client.receiveMessage().equals("OK")) {
 				break;
+			}
 		}
 	}
 
