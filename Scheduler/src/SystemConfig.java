@@ -19,13 +19,13 @@ public final class SystemConfig {
         /**
          * Instantiates and validates a ServerType, describing a set of instanced resources
          *
-         * @param name       the name of the server type
-         * @param limit      a non-negative integer indicating how many can coexist
-         * @param bootTime   a non-negative integer indicating how long it takes to start an instance
-         * @param rate a non-negative rational number representing the cost of running an instance for an hour
-         * @param cores      a positive integer representing how many cores the server type offers
-         * @param memory     a positive integer representing how much memory the server type offers
-         * @param disk       a positive integer representing how much disk the server type offers
+         * @param name     the name of the server type
+         * @param limit    a non-negative integer indicating how many can coexist
+         * @param bootTime a non-negative integer indicating how long it takes to start an instance
+         * @param rate     a non-negative rational number representing the cost of running an instance for an hour
+         * @param cores    a positive integer representing how many cores the server type offers
+         * @param memory   a positive integer representing how much memory the server type offers
+         * @param disk     a positive integer representing how much disk the server type offers
          * @throws IllegalArgumentException when any of the arguments fail to meet the specified criteria
          */
         private ServerType(String name, int limit, int bootTime, float rate, int cores, int memory, int disk)
