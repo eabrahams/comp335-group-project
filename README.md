@@ -11,3 +11,11 @@ Jonathan Stacey (Ourous)
 
 Armam Hassan (emoxeon)
 
+#Stage 1
+
+#Build
+javac Main.java
+
+#Run (with server running)
+java Main
+
