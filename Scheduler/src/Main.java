@@ -44,12 +44,12 @@ public class Main {
 			if (!client.receiveMessage().equals("OK"))
 				break;
 		}
-
-		client.sendMessage("QUIT");
 	}
 
 	public static void main(String[] args) throws Exception {
 		SocketConnection client = initClient();
 		allToLargest(client);
+		client.sendMessage("QUIT");
+		client.close();
 	}
 }

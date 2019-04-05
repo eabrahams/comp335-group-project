@@ -54,4 +54,12 @@ public class SocketConnection {
 		sendMessage(message);
 		return expectedResponse.equals(receiveMessage());
 	}
+
+	public void close() {
+		try {
+			clientSocket.close();
+		} catch (IOException error) {
+			System.err.println(error);
+		}
+	}
 }
