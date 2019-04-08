@@ -143,16 +143,18 @@ public final class SystemConfig {
          * @param memory to release, in megabytes
          * @param disk   to release, in megabytes
          * @return the modified ServerInfo for method chaining
-         * @throws IllegalArgumentException when any arguments are negative
+         * @throws IllegalArgumentException when any arguments are negative or beyond the maximum server capacity
          */
         public ServerInfo releaseResources(int cores, int memory, int disk)
         throws IllegalArgumentException {
             if(cores < 0 || memory < 0 || disk < 0) {
                 throw new IllegalArgumentException("All arguments must be non-negative");
+            } else if(cores > type.cores || memory > type.memory || disk > type.disk) {
+                throw new IllegalArgumentException("Arguments must be within capacity of server type");
             }
-            if(cores > 0) availableCores = Math.min(availableCores + cores, type.cores);
-            if(memory > 0) availableMemory = Math.min(availableMemory + memory, type.memory);
-            if(disk > 0) availableDisk = Math.min(availableDisk + disk, type.disk);
+            this.availableCores = Math.min(availableCores + cores, type.cores);
+            this.availableMemory = Math.min(availableMemory + memory, type.memory);
+            this.availableDisk = Math.min(availableDisk + disk, type.disk);
             return this;
         }
         
@@ -167,6 +169,20 @@ public final class SystemConfig {
             this.availableMemory = type.memory;
             this.availableDisk = type.disk;
             return this;
+        }
+        
+        /**
+         * Attempt to release resources
+         *
+         * @return whether the resources were released
+         */
+        public boolean tryReleaseResources(int cores, int memory, int disk) {
+            try {
+                this.releaseResources(cores, memory, disk);
+                return true;
+            } catch(IllegalArgumentException e) {
+                return false;
+            }
         }
         
         /**
