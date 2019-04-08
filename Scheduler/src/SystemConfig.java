@@ -10,23 +10,24 @@ public final class SystemConfig {
     public final class ServerType {
         final String name;
         final int    limit;
-        final int    bootTime;
+        final int    bootTime; // seconds
         final float  rate;
         final int    cores;
-        final int    memory;
-        final int    disk;
+        final int    memory; // megabytes
+        final int    disk; // megabytes
         
         /**
          * Instantiates and validates a ServerType, describing a set of instanced resources
          *
-         * @param name       the name of the server type
-         * @param limit      a non-negative integer indicating how many can coexist
-         * @param bootTime   a non-negative integer indicating how long it takes to start an instance
-         * @param rate a non-negative rational number representing the cost of running an instance for an hour
-         * @param cores      a positive integer representing how many cores the server type offers
-         * @param memory     a positive integer representing how much memory the server type offers
-         * @param disk       a positive integer representing how much disk the server type offers
-         * @throws IllegalArgumentException when any of the arguments fail to meet the specified criteria
+         * @param name     the name of the server type
+         * @param limit    how many concurrent instances can exist
+         * @param bootTime how long it takes to start an instance, in seconds
+         * @param rate     //TODO: figure out what this means
+         * @param cores    how many virtual CPU cores the server type offers
+         * @param memory   how much memory the server type offers, in megabytes
+         * @param disk     how much disk space the server type offers, in megabytes
+         * @throws IllegalArgumentException when any of the arguments are negative, irrational,
+         *                                  or resource arguments are zero
          */
         private ServerType(String name, int limit, int bootTime, float rate, int cores, int memory, int disk)
         throws IllegalArgumentException {
@@ -36,7 +37,7 @@ public final class SystemConfig {
             if(rate < 0.0 || Float.isNaN(rate) || Float.isInfinite(rate)) {
                 throw new IllegalArgumentException("`rate` must be a non-negative rational number");
             }
-            if(cores <= 0) throw new IllegalArgumentException("`coreCount` must be positive");
+            if(cores <= 0) throw new IllegalArgumentException("`cores` must be positive");
             if(memory <= 0) throw new IllegalArgumentException("`memory` must be positive");
             if(disk <= 0) throw new IllegalArgumentException("`disk` must be positive");
             this.name = name;
@@ -114,14 +115,21 @@ public final class SystemConfig {
     
     
     public final class ServerInfo {
-        final   ServerType  type;
-        final   int         id;
+        final ServerType type;
+        final int        id;
         private ServerState state = ServerState.Offline;
-        private int         availableTime;
-        private int         availableCores;
-        private int         availableMemory;
-        private int         availableDisk;
+        //TODO: figure out what this is
+        private int availableTime;
+        private int availableCores;
+        private int availableMemory; // megabytes
+        private int availableDisk; // megabytes
         
+        /**
+         * Instantiates a ServerInfo, setting available resources to maximum
+         *
+         * @param type the type of server
+         * @param id   the identifier of the server
+         */
         private ServerInfo(ServerType type, int id) {
             this.type = type;
             this.id = id;
@@ -130,24 +138,51 @@ public final class SystemConfig {
             this.availableDisk = type.disk;
         }
         
-        public void releaseResources(int cores, int memory, int disk) {
-            if(cores >= 0) availableCores = Math.min(availableCores + cores, type.cores);
-            if(memory >= 0) availableMemory = Math.min(availableMemory + memory, type.memory);
-            if(disk >= 0) availableDisk = Math.min(availableDisk + disk, type.disk);
+        /**
+         * Releases the specified resource quantities
+         *
+         * @param cores  to release
+         * @param memory to release, in megabytes
+         * @param disk   to release, in megabytes
+         * @return the modified ServerInfo for method chaining
+         * @throws IllegalArgumentException when any arguments are negative or beyond the maximum server capacity
+         */
+        public ServerInfo releaseResources(int cores, int memory, int disk)
+        throws IllegalArgumentException {
+            if(cores < 0 || memory < 0 || disk < 0) {
+                throw new IllegalArgumentException("All arguments must be non-negative");
+            } else if(cores > type.cores || memory > type.memory || disk > type.disk) {
+                throw new IllegalArgumentException("Arguments must be within capacity of server type");
+            }
+            this.availableCores = Math.min(availableCores + cores, type.cores);
+            this.availableMemory = Math.min(availableMemory + memory, type.memory);
+            this.availableDisk = Math.min(availableDisk + disk, type.disk);
+            return this;
         }
         
-        public boolean tryReserveResources(int cores, int memory, int disk) {
-            if(0 <= cores
-               && cores <= availableCores
-               && 0 <= memory
-               && memory <= availableMemory
-               && 0 <= disk
-               && disk <= availableDisk) {
-                availableCores -= cores;
-                availableMemory -= memory;
-                availableDisk -= disk;
+        /**
+         * Releases all currently used resources
+         *
+         * @return the modified ServerInfo for method chaining
+         */
+        public ServerInfo releaseResources() {
+            //TODO: determine what availableTime should be set to
+            this.availableCores = type.cores;
+            this.availableMemory = type.memory;
+            this.availableDisk = type.disk;
+            return this;
+        }
+        
+        /**
+         * Attempt to release resources
+         *
+         * @return whether the resources were released
+         */
+        public boolean tryReleaseResources(int cores, int memory, int disk) {
+            try {
+                this.releaseResources(cores, memory, disk);
                 return true;
-            } else {
+            } catch(IllegalArgumentException e) {
                 return false;
             }
         }
@@ -156,10 +191,10 @@ public final class SystemConfig {
          * Updates a ServerInfo in-place with a new internal state
          *
          * @param state  the new state
-         * @param time   the new available time
+         * @param time   the new available time, in seconds
          * @param cores  the new available cores
-         * @param memory the new available memory
-         * @param disk   the new available disk space
+         * @param memory the new free memory capacity, in megabytes
+         * @param disk   the new available disk space, in megabytes
          * @return the updated ServerInfo, for method chaining
          * @throws IllegalArgumentException when the arguments are negative or outside the capacity of the server type
          */
@@ -183,10 +218,10 @@ public final class SystemConfig {
          * Attempt to update a ServerInfo in-place
          *
          * @param state  the new state
-         * @param time   the new available time
+         * @param time   the new available time, in seconds
          * @param cores  the new available cores
-         * @param memory the new available memory
-         * @param disk   the new available disk space
+         * @param memory the new free memory capacity, in megabytes
+         * @param disk   the new available disk space, in megabytes
          * @return whether the update succeeded or not
          */
         public boolean tryUpdate(ServerState state, int time, int cores, int memory, int disk) {
@@ -202,22 +237,40 @@ public final class SystemConfig {
             return state;
         }
         
+        /**
+         * @return the available server time, in seconds
+         */
         public int getAvailableTime() {
             return availableTime;
         }
         
+        /**
+         * @return the available virtual CPU cores
+         */
         public int getAvailableCores() {
             return availableCores;
         }
         
+        /**
+         * @return the free memory capacity, in megabytes
+         */
         public int getAvailableMemory() {
             return availableMemory;
         }
         
+        /**
+         * @return the available disk space, in megabytes
+         */
         public int getAvailableDisk() {
             return availableDisk;
         }
         
+        /**
+         * Check if two servers are the same. Only considers type and id.
+         *
+         * @param obj the other server
+         * @return whether `obj` is a ServerInfo with matching type and id
+         */
         @Override
         public boolean equals(Object obj) {
             if(this == obj) {
@@ -225,6 +278,7 @@ public final class SystemConfig {
             } else if(obj instanceof ServerInfo) {
                 ServerInfo other = (ServerInfo) obj;
                 return this.type == other.type && this.id == other.id;
+                // only compare on these two attributes as the others can change and it'll still be the same server
             } else {
                 return false;
             }
@@ -246,7 +300,7 @@ public final class SystemConfig {
      * @param doc the XML Document
      * @throws IllegalArgumentException when the document does not represent a valid system configuration
      */
-    public SystemConfig(Document doc)
+    private SystemConfig(Document doc)
     throws IllegalArgumentException {
         if(doc == null) throw new NullPointerException("`doc` cannot be null");
         Element root = doc.getDocumentElement();
@@ -279,6 +333,7 @@ public final class SystemConfig {
                                     }
                                 case Node.TEXT_NODE:
                                 case Node.COMMENT_NODE:
+                                    // allow comments and text
                                     continue;
                                 default:
                                     throw new IllegalArgumentException("Unexpected node type under 'servers'");
@@ -291,6 +346,7 @@ public final class SystemConfig {
                     }
                 case Node.TEXT_NODE:
                 case Node.COMMENT_NODE:
+                    // allow comments and text
                     continue;
                 default:
                     throw new IllegalArgumentException("Unexpected node type under 'system'");
@@ -301,6 +357,7 @@ public final class SystemConfig {
         for(ServerType type : serverTypes.values()) {
             List<ServerInfo> group = new ArrayList<>(type.limit);
             for(int i = 0; i < type.limit; ++i) group.add(new ServerInfo(type, i));
+            // make sure the id of a server matches the index in its list
             servers.put(type, Collections.unmodifiableList(group));
         }
         this.servers = Collections.unmodifiableMap(servers);
@@ -342,19 +399,6 @@ public final class SystemConfig {
     }
     
     /**
-     * Instantiates a SystemConfig from a file containing an XML Document, performing validation
-     *
-     * @param path the path to a containing an XML Document
-     * @return a valid system configuration
-     * @throws IOException              when there was a problem reading the file
-     * @throws IllegalArgumentException when the file does not represent a valid system configuration
-     */
-    public static SystemConfig fromFile(String path)
-    throws IOException, IllegalArgumentException {
-        return SystemConfig.fromFile(new File(path));
-    }
-    
-    /**
      * Instantiates a SystemConfig from a string containing an XML Document, performing validation
      *
      * @param str the string containing the XML Document
@@ -388,6 +432,9 @@ public final class SystemConfig {
      * @return the server type
      */
     public ServerType getServerType(String name) {
+        if(name == null) throw new NullPointerException("`name` cannot be null");
+        ServerType type = serverTypes.get(name);
+        if(type == null) throw new NoSuchElementException(String.format("'%s' is not a known server type", name));
         return serverTypes.get(name);
     }
     
@@ -409,7 +456,10 @@ public final class SystemConfig {
      * @return the servers with that type
      */
     public List<ServerInfo> getServers(ServerType type) {
-        return servers.get(type);
+        if(type == null) throw new NullPointerException("`type` must not be null");
+        List<ServerInfo> group = servers.get(type);
+        if(group == null) return Collections.unmodifiableList(new ArrayList<>());
+        return group;
     }
     
     /**
@@ -420,6 +470,6 @@ public final class SystemConfig {
      * @return the server
      */
     public ServerInfo getServer(ServerType type, int id) {
-        return servers.get(type).get(id);
+        return this.getServers(type).get(id);
     }
 }

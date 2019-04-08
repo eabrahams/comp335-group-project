@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- system information generated for COMP335@MQ, S1, 2019 -->
+<system>
+<servers>
+<server type="small" limit="5" bootupTime="60" rate="0.2" coreCount="2" memory="4000" disk="16000" />
+<server type="medium" limit="5" bootupTime="60" rate="0.4" coreCount="4" memory="16000" disk="64000" />
+<server type="large" limit="5" bootupTime="60" rate="0.8" coreCount="8" memory="32000" disk="256000" />
+</servers>
+</system>
