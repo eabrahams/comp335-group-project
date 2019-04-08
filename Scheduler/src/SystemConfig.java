@@ -114,14 +114,20 @@ public final class SystemConfig {
     
     
     public final class ServerInfo {
-        final   ServerType  type;
-        final   int         id;
+        final ServerType type;
+        final int        id;
         private ServerState state = ServerState.Offline;
-        private int         availableTime;
-        private int         availableCores;
-        private int         availableMemory;
-        private int         availableDisk;
+        private int availableTime;
+        private int availableCores;
+        private int availableMemory;
+        private int availableDisk;
         
+        /**
+         * Instantiates a ServerInfo, setting available resources to maximum
+         *
+         * @param type the type of server
+         * @param id   the identifier of the server
+         */
         private ServerInfo(ServerType type, int id) {
             this.type = type;
             this.id = id;
@@ -130,26 +136,37 @@ public final class SystemConfig {
             this.availableDisk = type.disk;
         }
         
-        public void releaseResources(int cores, int memory, int disk) {
-            if(cores >= 0) availableCores = Math.min(availableCores + cores, type.cores);
-            if(memory >= 0) availableMemory = Math.min(availableMemory + memory, type.memory);
-            if(disk >= 0) availableDisk = Math.min(availableDisk + disk, type.disk);
+        /**
+         * Releases the specified resource quantities
+         *
+         * @param cores  to release
+         * @param memory to release, in megabytes
+         * @param disk   to release, in megabytes
+         * @return the modified ServerInfo for method chaining
+         * @throws IllegalArgumentException when any arguments are negative
+         */
+        public ServerInfo releaseResources(int cores, int memory, int disk)
+        throws IllegalArgumentException {
+            if(cores < 0 || memory < 0 || disk < 0) {
+                throw new IllegalArgumentException("All arguments must be non-negative");
+            }
+            if(cores > 0) availableCores = Math.min(availableCores + cores, type.cores);
+            if(memory > 0) availableMemory = Math.min(availableMemory + memory, type.memory);
+            if(disk > 0) availableDisk = Math.min(availableDisk + disk, type.disk);
+            return this;
         }
         
-        public boolean tryReserveResources(int cores, int memory, int disk) {
-            if(0 <= cores
-               && cores <= availableCores
-               && 0 <= memory
-               && memory <= availableMemory
-               && 0 <= disk
-               && disk <= availableDisk) {
-                availableCores -= cores;
-                availableMemory -= memory;
-                availableDisk -= disk;
-                return true;
-            } else {
-                return false;
-            }
+        /**
+         * Releases all currently used resources
+         *
+         * @return the modified ServerInfo for method chaining
+         */
+        public ServerInfo releaseResources() {
+            //TODO: determine what availableTime should be set to
+            this.availableCores = type.cores;
+            this.availableMemory = type.memory;
+            this.availableDisk = type.disk;
+            return this;
         }
         
         /**
@@ -218,6 +235,12 @@ public final class SystemConfig {
             return availableDisk;
         }
         
+        /**
+         * Check if two servers are the same. Only considers type and id.
+         *
+         * @param obj the other server
+         * @return whether `obj` is a ServerInfo with matching type and id
+         */
         @Override
         public boolean equals(Object obj) {
             if(this == obj) {
@@ -225,6 +248,7 @@ public final class SystemConfig {
             } else if(obj instanceof ServerInfo) {
                 ServerInfo other = (ServerInfo) obj;
                 return this.type == other.type && this.id == other.id;
+                // only compare on these two attributes as the others can change and it'll still be the same server
             } else {
                 return false;
             }
@@ -246,7 +270,7 @@ public final class SystemConfig {
      * @param doc the XML Document
      * @throws IllegalArgumentException when the document does not represent a valid system configuration
      */
-    public SystemConfig(Document doc)
+    private SystemConfig(Document doc)
     throws IllegalArgumentException {
         if(doc == null) throw new NullPointerException("`doc` cannot be null");
         Element root = doc.getDocumentElement();
@@ -279,6 +303,7 @@ public final class SystemConfig {
                                     }
                                 case Node.TEXT_NODE:
                                 case Node.COMMENT_NODE:
+                                    // allow comments and text
                                     continue;
                                 default:
                                     throw new IllegalArgumentException("Unexpected node type under 'servers'");
@@ -291,6 +316,7 @@ public final class SystemConfig {
                     }
                 case Node.TEXT_NODE:
                 case Node.COMMENT_NODE:
+                    // allow comments and text
                     continue;
                 default:
                     throw new IllegalArgumentException("Unexpected node type under 'system'");
@@ -301,6 +327,7 @@ public final class SystemConfig {
         for(ServerType type : serverTypes.values()) {
             List<ServerInfo> group = new ArrayList<>(type.limit);
             for(int i = 0; i < type.limit; ++i) group.add(new ServerInfo(type, i));
+            // make sure the id of a server matches the index in its list
             servers.put(type, Collections.unmodifiableList(group));
         }
         this.servers = Collections.unmodifiableMap(servers);
@@ -342,19 +369,6 @@ public final class SystemConfig {
     }
     
     /**
-     * Instantiates a SystemConfig from a file containing an XML Document, performing validation
-     *
-     * @param path the path to a containing an XML Document
-     * @return a valid system configuration
-     * @throws IOException              when there was a problem reading the file
-     * @throws IllegalArgumentException when the file does not represent a valid system configuration
-     */
-    public static SystemConfig fromFile(String path)
-    throws IOException, IllegalArgumentException {
-        return SystemConfig.fromFile(new File(path));
-    }
-    
-    /**
      * Instantiates a SystemConfig from a string containing an XML Document, performing validation
      *
      * @param str the string containing the XML Document
@@ -388,6 +402,9 @@ public final class SystemConfig {
      * @return the server type
      */
     public ServerType getServerType(String name) {
+        if(name == null) throw new NullPointerException("`name` cannot be null");
+        ServerType type = serverTypes.get(name);
+        if(type == null) throw new NoSuchElementException(String.format("'%s' is not a known server type", name));
         return serverTypes.get(name);
     }
     
@@ -409,7 +426,10 @@ public final class SystemConfig {
      * @return the servers with that type
      */
     public List<ServerInfo> getServers(ServerType type) {
-        return servers.get(type);
+        if(type == null) throw new NullPointerException("`type` must not be null");
+        List<ServerInfo> group = servers.get(type);
+        if(group == null) return Collections.unmodifiableList(new ArrayList<>());
+        return group;
     }
     
     /**
@@ -420,6 +440,6 @@ public final class SystemConfig {
      * @return the server
      */
     public ServerInfo getServer(ServerType type, int id) {
-        return servers.get(type).get(id);
+        return this.getServers(type).get(id);
     }
 }
