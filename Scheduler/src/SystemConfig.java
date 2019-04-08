@@ -10,23 +10,24 @@ public final class SystemConfig {
     public final class ServerType {
         final String name;
         final int    limit;
-        final int    bootTime;
+        final int    bootTime; // seconds
         final float  rate;
         final int    cores;
-        final int    memory;
-        final int    disk;
+        final int    memory; // megabytes
+        final int    disk; // megabytes
         
         /**
          * Instantiates and validates a ServerType, describing a set of instanced resources
          *
          * @param name     the name of the server type
-         * @param limit    a non-negative integer indicating how many can coexist
-         * @param bootTime a non-negative integer indicating how long it takes to start an instance
-         * @param rate     a non-negative rational number representing the cost of running an instance for an hour
-         * @param cores    a positive integer representing how many cores the server type offers
-         * @param memory   a positive integer representing how much memory the server type offers
-         * @param disk     a positive integer representing how much disk the server type offers
-         * @throws IllegalArgumentException when any of the arguments fail to meet the specified criteria
+         * @param limit    how many concurrent instances can exist
+         * @param bootTime how long it takes to start an instance, in seconds
+         * @param rate     //TODO: figure out what this means
+         * @param cores    how many virtual CPU cores the server type offers
+         * @param memory   how much memory the server type offers, in megabytes
+         * @param disk     how much disk space the server type offers, in megabytes
+         * @throws IllegalArgumentException when any of the arguments are negative, irrational,
+         *                                  or resource arguments are zero
          */
         private ServerType(String name, int limit, int bootTime, float rate, int cores, int memory, int disk)
         throws IllegalArgumentException {
@@ -117,10 +118,11 @@ public final class SystemConfig {
         final ServerType type;
         final int        id;
         private ServerState state = ServerState.Offline;
+        //TODO: figure out what this is
         private int availableTime;
         private int availableCores;
-        private int availableMemory;
-        private int availableDisk;
+        private int availableMemory; // megabytes
+        private int availableDisk; // megabytes
         
         /**
          * Instantiates a ServerInfo, setting available resources to maximum
@@ -189,10 +191,10 @@ public final class SystemConfig {
          * Updates a ServerInfo in-place with a new internal state
          *
          * @param state  the new state
-         * @param time   the new available time
+         * @param time   the new available time, in seconds
          * @param cores  the new available cores
-         * @param memory the new available memory
-         * @param disk   the new available disk space
+         * @param memory the new free memory capacity, in megabytes
+         * @param disk   the new available disk space, in megabytes
          * @return the updated ServerInfo, for method chaining
          * @throws IllegalArgumentException when the arguments are negative or outside the capacity of the server type
          */
@@ -216,10 +218,10 @@ public final class SystemConfig {
          * Attempt to update a ServerInfo in-place
          *
          * @param state  the new state
-         * @param time   the new available time
+         * @param time   the new available time, in seconds
          * @param cores  the new available cores
-         * @param memory the new available memory
-         * @param disk   the new available disk space
+         * @param memory the new free memory capacity, in megabytes
+         * @param disk   the new available disk space, in megabytes
          * @return whether the update succeeded or not
          */
         public boolean tryUpdate(ServerState state, int time, int cores, int memory, int disk) {
@@ -235,18 +237,30 @@ public final class SystemConfig {
             return state;
         }
         
+        /**
+         * @return the available server time, in seconds
+         */
         public int getAvailableTime() {
             return availableTime;
         }
         
+        /**
+         * @return the available virtual CPU cores
+         */
         public int getAvailableCores() {
             return availableCores;
         }
         
+        /**
+         * @return the free memory capacity, in megabytes
+         */
         public int getAvailableMemory() {
             return availableMemory;
         }
         
+        /**
+         * @return the available disk space, in megabytes
+         */
         public int getAvailableDisk() {
             return availableDisk;
         }
