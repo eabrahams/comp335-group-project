@@ -23,31 +23,31 @@ public class Job {
 		return data;
 	}
 	
-	public int getSubmitTime(){
+	public String getSubmitTime(){
 		return submitTime;
 	}
 	
-	public int getJobId(){
+	public String getJobId(){
 		return jobId;
 	}
 	
-	public int getEstimatedRuntime(){
+	public String getEstimatedRuntime(){
 		return estimatedRuntime;
 	}
 	
-	public int getCores(){
+	public String getCores(){
 		return cores;
 	}
 	
-	public int getMemory(){
+	public String getMemory(){
 		return memory;
 	}
 	
-	public int getDisk(){
+	public String getDisk(){
 		return disk;
 	}
 	
-	public int getCompleted(){
+	public boolean getCompleted(){
 		return complete;
 	}
 	
@@ -86,7 +86,7 @@ public class Job {
 		this.disk = Integer.toString(d);
 	}
 	
-	public void setComplited(boolean true){
+	public void setComplited(){
 		this.complete = true;
 	}
 		
