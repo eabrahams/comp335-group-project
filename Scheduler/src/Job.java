@@ -1,11 +1,11 @@
 public class Job {
 	
-	private static String submitTime;
-	private static String jobId;
-	private static String estimatedRuntime;
-	private static String cores;
-	private static String memory;
-	private static String disk;
+	private int submitTime;
+	private int jobId;
+	private int estimatedRuntime;
+	private int cores;
+	private int memory;
+	private int disk;
 	
 	private boolean complete = false;
 	
@@ -14,27 +14,27 @@ public class Job {
 	
 	
 	
-	public static String getSubmitTime(){
+	public int getSubmitTime(){
 		return submitTime;
 	}
 	
-	public static String getJobId(){
+	public int getJobId(){
 		return jobId;
 	}
 	
-	public static String getEstimatedRuntime(){
+	public int getEstimatedRuntime(){
 		return estimatedRuntime;
 	}
 	
-	public static String getCores(){
+	public int getCores(){
 		return cores;
 	}
 	
-	public static String getMemory(){
+	public int getMemory(){
 		return memory;
 	}
 	
-	public static String getDisk(){
+	public int getDisk(){
 		return disk;
 	}
 	
@@ -45,27 +45,27 @@ public class Job {
 	//setter
 
 	
-	public void setSubmitTime(String t){
+	public void setSubmitTime(int t){
 		this.submitTime = t;
 	}
 	
-	public void setJobId(String jID){
+	public void setJobId(int jID){
 		this.jobId = jID;
 	}
 	
-	public void setEstimatedRuntime(String rt){
+	public void setEstimatedRuntime(int rt){
 		this.estimatedRuntime = rt;
 	}
 	
-	public void setCores(String c){
+	public void setCores(int c){
 		this.cores = c;
 	}
 	
-	public void setMemory(String m){
+	public void setMemory(int m){
 		this.memory = m;
 	}
 	
-	public void setDisk(String d){
+	public void setDisk(int d){
 		this.disk = d;
 	}
 	
@@ -74,19 +74,19 @@ public class Job {
 	}
 		
 	public Job(int submitTime, int jobId, int estimatedRuntime, int cores, int memory, int disk){
-		setSubmitTime(Integer.toString(submitTime));
-		setJobId(Integer.toString(jobId));
-		setEstimatedRuntime(Integer.toString(estimatedRuntime));
-		setCores(Integer.toString(cores));
-		setMemory(Integer.toString(memory));
-		setDisk(Integer.toString(disk));
+		setSubmitTime(submitTime);
+		setJobId(jobId);
+		setEstimatedRuntime(estimatedRuntime);
+		setCores(cores);
+		setMemory(memory);
+		setDisk(disk);
 	}
 	
-	
-	public static String[] getData() {
+	//to get data as an array
+	public int[] getData() {
 		
-		String[] data = new String[7]; //{null, submitTime, jobId, estimatedRuntime, cores, memory, disk};
-		data[0] = null;
+		int[] data = new int[7]; //{null, submitTime, jobId, estimatedRuntime, cores, memory, disk};
+		
 		data[1] = submitTime;
 		data[2] = jobId;
 		data[3] = estimatedRuntime;
