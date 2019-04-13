@@ -61,7 +61,3 @@ bool client_msg_resp(socket_client *client, char *msg, char *expected_response) 
 	return result;
 }
 
-int main(int argc, char **argv) {
-	socket_client *c = client_init(LOCALHOST, 62000);
-	return 0;
-}
