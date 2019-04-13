@@ -15,6 +15,12 @@
 #define END "."
 #define VERBOSE
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * creates and prepares socket to communicate with server  *
+ * greeting and authentication is handled here. The next   *
+ * message to be sent is "REDY", after which the server    *
+ * will start sending jobs.								   *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 socket_client *client_init(char *host, int port) {
 	socket_client *client = malloc(sizeof *client);
 	client->socket = malloc(sizeof *client->socket);
@@ -34,10 +40,15 @@ socket_client *client_init(char *host, int port) {
 	return client;
 }
 
+/* sends a null-terminated string to the server over
+ * a socket */
 void client_send(socket_client *client, char *msg) {
 	send(client->fd, msg, strlen(msg), 0);
 }
 
+/* returns a string that is sent by the server.
+ * TODO: find a way that doesn't involve creating
+ * a massive string buffer. */
 char *client_receive(socket_client *client) {
 	char *buffer = malloc(sizeof *buffer * 1024);
 	int length = read(client->fd, buffer, 1023);
@@ -48,6 +59,9 @@ char *client_receive(socket_client *client) {
 	return msg;
 }
 
+/* Sends a message and then checks if the response is
+ * the one expected. If we know exactly what the response
+ * should be then use this. */
 bool client_msg_resp(socket_client *client, char *msg, char *expected_response) {
 	bool result = true;
 	client_send(client, msg);
