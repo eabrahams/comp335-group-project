@@ -15,6 +15,8 @@
 #define END "."
 #define VERBOSE
 
+bool client_msg_resp(socket_client *client, char *msg, char *expected_response);
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * creates and prepares socket to communicate with server  *
  * greeting and authentication is handled here. The next   *
