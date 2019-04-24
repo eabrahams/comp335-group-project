@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 	typedef struct server_type {
-		char *const name;
+		char *name;
 		int limit;
 		int bootTime;
 		float rate;
@@ -17,7 +17,7 @@ extern "C" {
 	} server_type;
 
 	typedef struct system_config {
-		server_type * server_types;
+		server_type *server_types;
 		size_t num_of_types;
 	} system_config;
 

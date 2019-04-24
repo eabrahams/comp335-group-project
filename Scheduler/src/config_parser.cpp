@@ -11,63 +11,92 @@ system_config *parse_config(const char *path) {
 	TiXmlDocument doc;
 	if(!doc.LoadFile(path)) return nullptr;
 	TiXmlElement *root = doc.RootElement();
-	if(strcmp("system", root->Value())) return nullptr;
+	if(strcmp("system", root->Value())) {
+		fprintf(stderr, "Parser: bad root element: expected 'system', but got '%s'\n", root->Value());
+		return nullptr;
+	}
 	TiXmlElement *nodes = root->FirstChildElement();
-	if(strcmp("servers", nodes->Value())) return nullptr;
-	auto server_types = std::vector<server_type>();
+	if(strcmp("servers", nodes->Value())) {
+		fprintf(stderr, "Parser: bad container element: expected 'servers', but got '%s'\n", nodes->Value());
+		return nullptr;
+	}
+	auto servers = std::vector<server_type>();
 	TiXmlElement *node;
 	for(node = nodes->FirstChildElement(); node != nullptr; node = node->NextSiblingElement()) {
-		int limit = std::stoi(node->Attribute("limit"));
-		if(limit <= 0) {
-			fprintf(stderr, "Parser: `limit` must be positive (was %i)\n", limit);
+		server_type server;
+
+		if(strcmp("server", node->Value())) {
+			fprintf(stderr, "Parser: bad member element: expected 'server', but got '%s'\n", node->Value());
+			break;
+		}
+		
+		if(node->QueryIntAttribute("limit", &server.limit) != TIXML_SUCCESS) {
+			fprintf(stderr, "Parser: bad member element: must have positive integer attribute 'limit'\n");
+			break;
+		} else if(server.limit <= 0) {
+			fprintf(stderr, "Parser: bad attribute: 'limit' must be a positive integer (was %i)\n", server.limit);
 			break;
 		}
 
-		int bootTime = std::stoi(node->Attribute("bootupTime"));
-		if(bootTime < 0) {
-			fprintf(stderr, "Parser: `bootupTime` cannot be negative (was %i)\n", bootTime);
+		if(node->QueryIntAttribute("bootupTime", &server.bootTime) != TIXML_SUCCESS) {
+			fprintf(stderr, "Parser: bad member element: must have non-negative integer attribute 'bootupTime'\n");
+			break;
+		} else if(server.bootTime < 0) {
+			fprintf(stderr, "Parser: bad attribute: 'bootupTime' must be a non-negative integer (was %i)\n", server.bootTime);
 			break;
 		}
 
-		float rate = std::stof(node->Attribute("rate"));
-		if(rate <= 0.0) {
-			fprintf(stderr, "Parser: `rate` must be positive (was %f)\n", rate);
+		if(node->QueryFloatAttribute("rate", &server.rate) != TIXML_SUCCESS) {
+			fprintf(stderr, "Parser: bad member element: must have positive floating-point attribute 'rate'\n");
+			break;
+		} else if(server.rate < 0) {
+			fprintf(stderr, "Parser: bad attribute: 'rate' must be a positive floating-point number (was %f)\n", server.rate);
 			break;
 		}
 
-		int cores = std::stoi(node->Attribute("coreCount"));
-		if(cores <= 0) {
-			fprintf(stderr, "Parser: `coreCount` must be positive (was %i)\n", cores);
+		if(node->QueryIntAttribute("coreCount", &server.cores) != TIXML_SUCCESS) {
+			fprintf(stderr, "Parser: bad member element: must have positive integer attribute 'coreCount'\n");
+			break;
+		} else if(server.cores <= 0) {
+			fprintf(stderr, "Parser: bad attribute: 'coreCount' must be a positive integer (was %i)\n", server.cores);
 			break;
 		}
 
-		int memory = std::stoi(node->Attribute("memory"));
-		if(memory <= 0) {
-			fprintf(stderr, "Parser: `memory` must be positive (was %i)\n", memory);
+		if(node->QueryIntAttribute("memory", &server.memory) != TIXML_SUCCESS) {
+			fprintf(stderr, "Parser: bad member element: must have positive integer attribute 'memory'\n");
+			break;
+		} else if(server.memory <= 0) {
+			fprintf(stderr, "Parser: bad attribute: 'memory' must be a positive integer (was %i)\n", server.memory);
 			break;
 		}
 
-		int disk = std::stoi(node->Attribute("disk"));
-		if(disk <= 0) {
-			fprintf(stderr, "Parser: `disk` must be positive (was %i)\n", disk);
+		if(node->QueryIntAttribute("disk", &server.disk) != TIXML_SUCCESS) {
+			fprintf(stderr, "Parser: bad member element: must have positive integer attribute 'disk'\n");
+			break;
+		} else if(server.disk <= 0) {
+			fprintf(stderr, "Parser: bad attribute: 'disk' must be a positive integer (was %i)\n", server.disk);
 			break;
 		}
 
 		// do this last so we don't have to free it if we broke out above
 		const char *name = node->Attribute("name");
-		char *name_copy = (char *) malloc(strlen(name) + 1);
-		strcpy(name_copy, name);
+		if(name == nullptr) {
+			fprintf(stderr, "Parser: bad member element: must have string attribute 'name'\n");
+			break;
+		}
+		server.name = (char *) malloc(strlen(name) + 1);
+		strcpy(server.name, name);
 
-		server_types.push_back(server_type{ name_copy, limit, bootTime, rate, cores, memory, disk });	
+		servers.push_back(server);
 	}
 	if(node == nullptr) { // success
 		system_config *config = (system_config *) malloc(sizeof(system_config));
-		config->num_of_types = server_types.size();
+		config->num_of_types = servers.size();
 		config->server_types = (server_type *) malloc(sizeof(server_type)*config->num_of_types);
-		memcpy(config->server_types, server_types.data(), sizeof(server_type)*config->num_of_types);
+		memcpy(config->server_types, servers.data(), sizeof(server_type)*config->num_of_types);
 		return config;
 	} else { // failure, free and return null
-		for(auto server : server_types) free(server.name);
+		for(auto server : servers) free(server.name);
 		return nullptr;
 	}
 }
