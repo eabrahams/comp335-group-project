@@ -14,6 +14,7 @@
 #define OK "OK"
 #define END "."
 #define VERBOSE
+#define BUF_SIZE 1024
 
 bool client_msg_resp(socket_client *client, char *msg, char *expected_response);
 
@@ -52,8 +53,8 @@ void client_send(socket_client *client, char *msg) {
  * TODO: find a way that doesn't involve creating
  * a massive string buffer. */
 char *client_receive(socket_client *client) {
-	char *buffer = malloc(sizeof *buffer * 1024);
-	int length = read(client->fd, buffer, 1023);
+	char *buffer = malloc(sizeof *buffer * BUF_SIZE);
+	int length = read(client->fd, buffer, BUF_SIZE - 1);
 	buffer[length] = '\0';
 	char *msg = malloc(sizeof *msg * length);
 	strncpy(msg, buffer, length);
@@ -61,9 +62,8 @@ char *client_receive(socket_client *client) {
 	return msg;
 }
 
-/* Sends a message and then checks if the response is
- * the one expected. If we know exactly what the response
- * should be then use this. */
+/* Sends a message and then checks if the response is the one expected.
+ * If we know exactly what the response should be then use this. */
 bool client_msg_resp(socket_client *client, char *msg, char *expected_response) {
 	bool result = true;
 	client_send(client, msg);
