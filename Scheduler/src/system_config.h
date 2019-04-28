@@ -55,6 +55,9 @@ void free_config(system_config *config) noexcept(true);
 // gets the first server of a given type, all other servers of that type follow it in the same memory region
 server_info *server_of_type(const system_config *config, const server_type *type) noexcept(true);
 
+// validates the new resources for the server, returning true and updating if they're valid; false otherwise
+bool update_server(server_info *server, server_state state, unsigned time, unsigned cores, unsigned memory, unsigned disk) noexcept(true);
+
 // reset the resources availiable on a server to default values
 void reset_server(server_info *server) noexcept(true);
 

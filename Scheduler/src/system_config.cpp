@@ -141,6 +141,16 @@ server_info *server_of_type(const system_config *config, const server_type *type
 	return nullptr;
 }
 
+bool update_server(server_info *server, server_state state, unsigned time, unsigned cores, unsigned memory, unsigned disk) noexcept(true) {
+	if(cores <= server->type->cores && memory <= server->type->memory && disk <= server->type->disk) {
+		server->state = state;
+		server->avail_cores = cores;
+		server->avail_memory = memory;
+		server->avail_disk = disk;
+		return true;
+	} else return false;
+}
+
 void reset_server(server_info *server) noexcept(true) {
 	//TODO: figure out what avail_time is
 	server->avail_cores = server->type->cores;
