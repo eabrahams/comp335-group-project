@@ -52,8 +52,11 @@ system_config *parse_config(const char *path) noexcept(true);
 // utility to enable a system_config to be freed in one go
 void free_config(system_config *config) noexcept(true);
 
+// gets the server_type matching a given name
+const server_type *type_by_name(const system_config *config, const char* name) noexcept(true);
+
 // gets the first server of a given type, all other servers of that type follow it in the same memory region
-server_info *server_of_type(const system_config *config, const server_type *type) noexcept(true);
+server_info *servers_by_type(const system_config *config, const server_type *type) noexcept(true);
 
 // validates the new resources for the server, returning true and updating if they're valid; false otherwise
 bool update_server(server_info *server, server_state state, unsigned time, unsigned cores, unsigned memory, unsigned disk) noexcept(true);
@@ -63,6 +66,8 @@ void reset_server(server_info *server) noexcept(true);
 
 #ifdef __cplusplus
 }
+#else
+#undef noexcept
 #endif
 
 #endif

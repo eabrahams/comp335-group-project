@@ -7,71 +7,73 @@
 
 #include "system_config.h"
 
-/*
-check if an element has an attribute with a given name,
-allocating and copying the data to dest_ptr and returning true if it does,
-otherwise returning false and logging to stderr.
-*/
-bool copy_string_attribute(const TiXmlElement *node, const char *attr_name, char **dest_ptr) noexcept(true) {
-	const char *attr_ptr = node->Attribute(attr_name);
-	if(attr_ptr == nullptr) {
-		std::cerr << "Parser: bad member element: must have string attribute '" << attr_name << "'\n";
-		return false;
-	} else {
-		*dest_ptr = static_cast<char *>(malloc(strlen(attr_ptr) + 1));
-		strcpy(*dest_ptr, attr_ptr);
-		return true;
+inline namespace {
+	/*
+	check if an element has an attribute with a given name,
+	allocating and copying the data to dest_ptr and returning true if it does,
+	otherwise returning false and logging to stderr.
+	*/
+	bool copy_string_attribute(const TiXmlElement *node, const char *attr_name, char **dest_ptr) noexcept(true) {
+		const char *attr_ptr = node->Attribute(attr_name);
+		if(attr_ptr == nullptr) {
+			std::cerr << "Parser: bad member element: must have string attribute '" << attr_name << "'\n";
+			return false;
+		} else {
+			*dest_ptr = static_cast<char *>(malloc(strlen(attr_ptr) + 1));
+			strcpy(*dest_ptr, attr_ptr);
+			return true;
+		}
 	}
-}
 
-/*
-check if an element has a non-negative integer attribute with a given name,
-copying the value to dest_ptr and returning true if it does, otherwise
-returning false and logging to stderr.
-*/
-bool get_unsigned_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
-	if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-		std::cerr << "Parser: bad member element: must have non-negative integer attribute '" << attr_name << "'\n";
+	/*
+	check if an element has a non-negative integer attribute with a given name,
+	copying the value to dest_ptr and returning true if it does, otherwise
+	returning false and logging to stderr.
+	*/
+	bool get_unsigned_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
+		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
+			std::cerr << "Parser: bad member element: must have non-negative integer attribute '" << attr_name << "'\n";
+			return false;
+		} else return true;
+	}
+
+	/*
+	check if an element has a positive integer attribute with a given name,
+	copying the value to dest_ptr and returning true if it does, otherwise
+	returning false and logging to stderr.
+	*/
+	bool get_positive_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
+		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
+			std::cerr << "Parser: bad member element: must have positive integer attribute '" << attr_name << "'\n";
+		} else if(*dest_ptr == 0) {
+			std::cerr << "Parser: bad attribute: '" << attr_name << "' must be a positive integer (was 0)\n";
+		} else return true;
 		return false;
-	} else return true;
-}
+	}
 
-/*
-check if an element has a positive integer attribute with a given name,
-copying the value to dest_ptr and returning true if it does, otherwise
-returning false and logging to stderr.
-*/
-bool get_positive_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
-	if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-		std::cerr << "Parser: bad member element: must have positive integer attribute '" << attr_name << "'\n";
-	} else if(*dest_ptr == 0) {
-		std::cerr << "Parser: bad attribute: '" << attr_name << "' must be a positive integer (was 0)\n";
-	} else return true;
-	return false;
-}
-
-/*
-check if an element has a positive floating-point attribute with a given name,
-copying the value to dest_ptr and returning true if it does, otherwise
-returning false and logging to stderr.
-*/
-bool get_positive_float_attribute(const TiXmlElement *node, const char *attr_name, float *dest_ptr) noexcept(true) {
-	if(node->QueryFloatAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-		std::cerr << "Parser: bad member element: must have positive floating-point attribute '" << attr_name << "'\n";
-	} else if(*dest_ptr == 0.0) {
-		std::cerr << "Parser: bad attribute: '" << attr_name << "' must be a positive floating-point number (was 0)\n";
-	} else return true;
-	return false;
-}
-
-/*
-verify that the name of an element is a given value
-*/
-bool elem_name_is(const TiXmlElement *elem, const char *name) noexcept(true) {
-	if(strcmp(name, elem->Value())) {
-		std::cerr << "Parser: bad element type: expected '" << name << "', but got '" << elem->Value() << "'\n";
+	/*
+	check if an element has a positive floating-point attribute with a given name,
+	copying the value to dest_ptr and returning true if it does, otherwise
+	returning false and logging to stderr.
+	*/
+	bool get_positive_float_attribute(const TiXmlElement *node, const char *attr_name, float *dest_ptr) noexcept(true) {
+		if(node->QueryFloatAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
+			std::cerr << "Parser: bad member element: must have positive floating-point attribute '" << attr_name << "'\n";
+		} else if(*dest_ptr == 0.0) {
+			std::cerr << "Parser: bad attribute: '" << attr_name << "' must be a positive floating-point number (was 0)\n";
+		} else return true;
 		return false;
-	} else return true;
+	}
+
+	/*
+	verify that the name of an element is a given value
+	*/
+	bool elem_name_is(const TiXmlElement *elem, const char *name) noexcept(true) {
+		if(strcmp(name, elem->Value())) {
+			std::cerr << "Parser: bad element type: expected '" << name << "', but got '" << elem->Value() << "'\n";
+			return false;
+		} else return true;
+	}
 }
 
 system_config *parse_config(const char *path) noexcept(true) {
@@ -134,7 +136,14 @@ void free_config(system_config *config) noexcept(true) {
 	free(config);
 }
 
-server_info *server_of_type(const system_config *config, const server_type *type) noexcept(true) {
+const server_type *type_by_name(const system_config *config, const char* name) noexcept(true) {
+	for(auto i = 0; i < config->num_types; ++i) {
+		if(!strcmp(config->types[i].name, name)) return &config->types[i];
+	}
+	return nullptr;
+};
+
+server_info *servers_by_type(const system_config *config, const server_type *type) noexcept(true) {
 	for(auto i = 0; i < config->num_servers; ++i) {
 		if(config->servers[i].type == type) return &config->servers[i];
 	}
