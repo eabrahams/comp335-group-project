@@ -3,7 +3,6 @@
 #include <cstring>
 #include <memory>
 #include <vector>
-#include <numeric>
 
 #include "system_config.h"
 
@@ -83,7 +82,7 @@ system_config *parse_config(const char *path) noexcept(true) {
 	if(!elem_name_is(root, "system")) return nullptr;
 	TiXmlElement *nodes = root->FirstChildElement();
 	if(!elem_name_is(nodes, "servers")) return nullptr;
-	auto server_types = std::vector<server_type>(); // use a vector to avoid over-alloc or realloc
+	auto types = std::vector<server_type>(); // use a vector to avoid over-alloc or realloc
 	TiXmlElement *node; // declare outside of loop to check if it finished properly
 	for(node = nodes->FirstChildElement(); node != nullptr && elem_name_is(node, "server"); node = node->NextSiblingElement()) {
 		server_type type;
@@ -96,18 +95,18 @@ system_config *parse_config(const char *path) noexcept(true) {
 		if(!get_positive_int_attribute(node, "disk", &type.disk)) break;
 		if(!copy_string_attribute(node, "type", &type.name)) break;
 
-		server_types.push_back(type);
+		types.push_back(type);
 	}
 	if(node != nullptr) { // failure, free and return null
-		for(auto type : server_types) free(type.name);
+		for(auto type : types) free(type.name);
 		return nullptr;
 	} // otherwise success
 
 	// have to make a copy of the server_type-s first, otherwise the vector will
 	//.. still own the memory they live in when we initialize server_info-s with them
-	size_t cfg_num_types = server_types.size();
+	size_t cfg_num_types = types.size();
 	server_type *cfg_types = static_cast<server_type *>(malloc(sizeof(server_type)*cfg_num_types));
-	memcpy(cfg_types, server_types.data(), sizeof(server_type)*cfg_num_types);
+	memcpy(cfg_types, types.data(), sizeof(server_type)*cfg_num_types);
 
 	// use a vector for this, again to avoid over-alloc or realloc
 	auto servers = std::vector<server_info>();

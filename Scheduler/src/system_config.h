@@ -1,5 +1,6 @@
 #ifndef system_config_h_
 #define system_config_h_
+
 #ifdef __cplusplus
 extern "C" {
 #else
