@@ -5,9 +5,18 @@ void allToLargest(socket_client *client) {
 	system_config config = parse_config("system.xml");
 	unsigned int i;
 	unsigned int largest_index = 0;
-	for (i = 1; i < config->num_types; i++) {
+	// start at 1, since we've set the index to 0
+	for (i = 1; i < config->num_types; i++)
 		if (config->types[i]->cores > config->types[largest_index]->cores)
 			largest_index = i;
+
+	while (true) {
+		client_send(client, "REDY");
+		char *resp = client_receive(client);
+		char *start = strtok(resp, " ");
+		if (strcmp(start, "JOBN") != 0) {
+			break;
+		}
 	}
 }
 
