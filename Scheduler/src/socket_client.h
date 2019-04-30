@@ -3,6 +3,9 @@
 
 #include <sys/socket.h>
 
+#define LOCALHOST "127.0.0.1"
+#define DEFAULT_PORT 8096
+
 typedef struct {
 	struct sockaddr_in *socket;
 	int fd;
