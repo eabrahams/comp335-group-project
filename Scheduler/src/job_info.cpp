@@ -22,6 +22,7 @@ job_info job_from_string(const char *jobstr) noexcept(true) {
 }
 
 bool job_can_run(const job_info *job, const resource_info resc) noexcept(true) {
+	// effectively just a delegate to the operator overload, but accessible from C
 	return job->req_resc <= resc;
 };
 

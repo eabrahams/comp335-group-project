@@ -8,7 +8,7 @@ constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 100000; // TODO: adjust this
 server_info *worst_fit(const system_config *config, const job_info *job) noexcept(true) {
 	int worst_fit, alt_fit, ini_fit;
 	server_info *worst_server, *alt_server, *ini_server;
-	worst_fit = alt_fit = std::numeric_limits<int>::min();
+	worst_fit = alt_fit = ini_fit = std::numeric_limits<int>::min();
 	for(auto i = 0; i < config->num_servers; ++i) {
 		server_info *server = config->servers + i;
 		if(job_can_run(job, server->avail_resc)) {

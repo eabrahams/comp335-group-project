@@ -113,7 +113,7 @@ system_config *parse_config(const char *path) noexcept(true) {
 	for(auto i = 0; i < cfg_num_types; ++i) {
 		server_type *type = cfg_types + i;
 		for(auto j = 0; j < type->limit; ++j) {
-			servers.push_back(server_info{ type, j, SS_OFFLINE, 0, type->max_resc });
+			servers.push_back(server_info{ type, j, server_state::SS_OFFLINE, 0, type->max_resc });
 		}
 	}
 
