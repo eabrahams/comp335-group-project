@@ -1,5 +1,5 @@
 #include "socket_client.h"
-#include "all_to_largest.h"
+#include "worst_fit.h"
 
 int main(int argc, char **argv) {
 	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
