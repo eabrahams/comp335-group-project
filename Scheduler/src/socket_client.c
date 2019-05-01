@@ -16,7 +16,7 @@
 #define VERBOSE
 #define BUF_SIZE 1024
 
-bool client_msg_resp(socket_client *client, char *msg, char *expected_response);
+bool client_msg_resp(socket_client *client, const char *msg, const char *expected_response);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * creates and prepares socket to communicate with server  *
@@ -45,7 +45,7 @@ socket_client *client_init(char *host, int port) {
 
 /* sends a null-terminated string to the server over
  * a socket */
-void client_send(socket_client *client, char *msg) {
+void client_send(socket_client *client, const char *msg) {
 	send(client->fd, msg, strlen(msg), 0);
 }
 
@@ -64,7 +64,7 @@ char *client_receive(socket_client *client) {
 
 /* Sends a message and then checks if the response is the one expected.
  * If we know exactly what the response should be then use this. */
-bool client_msg_resp(socket_client *client, char *msg, char *expected_response) {
+bool client_msg_resp(socket_client *client, const char *msg, const char *expected_response) {
 	bool result = true;
 	client_send(client, msg);
 	char *response = client_receive(client);

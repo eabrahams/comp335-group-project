@@ -35,23 +35,9 @@ inline namespace {
 	*/
 	bool get_unsigned_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
 		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-			std::cerr << "Parser: bad member element: must have non-negative integer attribute '" << attr_name << "'\n";
+			std::cerr << "Parser: bad member element: must have unsigned integer attribute '" << attr_name << "'\n";
 			return false;
 		} else return true;
-	}
-
-	/*
-	check if an element has a positive integer attribute with a given name,
-	copying the value to dest_ptr and returning true if it does, otherwise
-	returning false and logging to stderr.
-	*/
-	bool get_positive_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
-		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-			std::cerr << "Parser: bad member element: must have positive integer attribute '" << attr_name << "'\n";
-		} else if(*dest_ptr == 0) {
-			std::cerr << "Parser: bad attribute: '" << attr_name << "' must be a positive integer (was 0)\n";
-		} else return true;
-		return false;
 	}
 
 	/*
@@ -91,12 +77,12 @@ system_config *parse_config(const char *path) noexcept(true) {
 	for(node = nodes->FirstChildElement(); node != nullptr && elem_name_is(node, "server"); node = node->NextSiblingElement()) {
 		server_type type;
 
-		if(!get_positive_int_attribute(node, "limit", &type.limit)) break;
+		if(!get_unsigned_int_attribute(node, "limit", &type.limit)) break;
 		if(!get_unsigned_int_attribute(node, "bootupTime", &type.bootTime)) break;
 		if(!get_positive_float_attribute(node, "rate", &type.rate)) break;
-		if(!get_positive_int_attribute(node, "coreCount", &type.max_resc.cores)) break;
-		if(!get_positive_int_attribute(node, "memory", &type.max_resc.memory)) break;
-		if(!get_positive_int_attribute(node, "disk", &type.max_resc.disk)) break;
+		if(!get_unsigned_int_attribute(node, "coreCount", &type.max_resc.cores)) break;
+		if(!get_unsigned_int_attribute(node, "memory", &type.max_resc.memory)) break;
+		if(!get_unsigned_int_attribute(node, "disk", &type.max_resc.disk)) break;
 		if(!copy_string_attribute(node, "type", &type.name)) break;
 
 		types.push_back(type);
@@ -106,26 +92,27 @@ system_config *parse_config(const char *path) noexcept(true) {
 		return nullptr;
 	} // otherwise success
 
+	system_config config;
+
 	// have to make a copy of the server_type-s first, otherwise the vector will
 	//.. still own the memory they live in when we initialize server_info-s with them
-	unsigned cfg_num_types = types.size();
-	server_type *cfg_types = static_cast<server_type *>(malloc(sizeof(server_type)*cfg_num_types));
-	memcpy(cfg_types, types.data(), sizeof(server_type)*cfg_num_types);
+	config.num_types = types.size();
+	config.types = static_cast<server_type *>(malloc(sizeof(server_type)*config.num_types));
+	memcpy(const_cast<server_type *>(config.types), types.data(), sizeof(server_type)*config.num_types);
 
 	// use a vector for this, again to avoid over-alloc or realloc
 	auto servers = std::vector<server_info>();
-	for(auto i = 0; i < cfg_num_types; ++i) {
-		server_type *type = cfg_types + i;
+	for(auto i = 0; i < config.num_types; ++i) {
+		auto *type = config.types + i;
 		for(auto j = 0; j < type->limit; ++j) {
-			servers.push_back(server_info{ type, j, server_state::SS_OFFLINE, 0, type->max_resc });
+			servers.push_back(server_info{ type, j, server_state::SS_INACTIVE, 0, type->max_resc });
 		}
 	}
 
-	unsigned cfg_num_servers = servers.size();
-	server_info *cfg_servers = static_cast<server_info *>(malloc(sizeof(server_info)*cfg_num_servers));
-	memcpy(cfg_servers, servers.data(), sizeof(server_info)*cfg_num_servers);
+	config.num_servers = servers.size();
+	config.servers = static_cast<server_info *>(malloc(sizeof(server_info)*config.num_servers));
+	memcpy(config.servers, servers.data(), sizeof(server_info)*config.num_servers);
 
-	system_config config{ cfg_types, cfg_num_types, cfg_servers, cfg_num_servers };
 	system_config *cfg_ptr = static_cast<system_config *>(malloc(sizeof(system_config)));
 	memcpy(cfg_ptr, &config, sizeof(system_config));
 

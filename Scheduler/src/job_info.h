@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #else
-#define noexcept(BOOL)
+#define noexcept
 #include <stdbool.h>
 #endif
 
@@ -18,18 +18,18 @@ typedef struct job_info {
 	resource_info req_resc;
 	bool complete;
 #ifdef __cplusplus
-	bool can_run(const resource_info &resc) const noexcept(true);
-	int fitness(const resource_info &resc) const noexcept(false);
+	bool can_run(const resource_info &resc) const noexcept;
+	int fitness(const resource_info &resc) const;
 #endif
 } job_info;
 
-job_info job_from_string(const char *jobstr) noexcept(true);
+job_info job_from_string(const char *jobstr) noexcept;
 
 // whether a job can run on given resources
-bool job_can_run(const job_info *job, const resource_info resc) noexcept(true);
+bool job_can_run(const job_info *job, const resource_info resc) noexcept;
 
 // the fitness for a job on given resources
-int job_fitness(const job_info *job, const resource_info resc) noexcept(true);
+int job_fitness(const job_info *job, const resource_info resc) noexcept;
 
 #ifdef __cplusplus
 }
