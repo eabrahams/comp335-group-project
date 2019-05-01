@@ -6,6 +6,10 @@ static_assert(std::is_pod_v<job_info>, "job_info MUST be POD to be C-compatible!
 #include <cstring>
 #include <cstdlib>
 
+/* create job struct from string
+ * format of string is:
+ * JOBN {SUBMIT_TIME} {ID} {RUN_TIME} {CORES} {MEMORY} {DISK} 
+ */
 job_info job_from_string(const char *jobstr) noexcept(true) {
 	if(strncmp(jobstr, "JOBN", 4) != 0) {
 		fprintf(stderr, "%s%s\n", "Bad job string: ", jobstr);
@@ -13,6 +17,7 @@ job_info job_from_string(const char *jobstr) noexcept(true) {
 	}
 
 	job_info j;
+	// The first 5 characters are "JOBN ", which we don't need
 	sscanf(jobstr + 5, "%d %d %d %d %d %d",
 		&j.submit_time,
 		&j.id,
