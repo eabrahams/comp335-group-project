@@ -8,6 +8,13 @@
 
 constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 100000; // TODO: adjust this to something sensible
 
+void worst_fit(socket_client *client) noexcept(true) {
+	system_config *config = parse_config("system.xml");
+
+	client_send(client, "QUIT");
+	free_config(config);
+};
+
 server_info *find_server(const system_config *config, const job_info &job) noexcept(true) {
 	int worst_fit, alt_fit, ini_fit;
 	server_info *worst_server, *alt_server, *ini_server;
