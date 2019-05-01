@@ -5,6 +5,7 @@ static_assert(std::is_pod_v<job_info>, "job_info MUST be POD to be C-compatible!
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <stdexcept>
 
 /* create job struct from string
  * format of string is:
@@ -34,7 +35,7 @@ bool job_info::can_run(const resource_info &resc) const noexcept(true) {
 
 int job_info::fitness(const resource_info &resc) const noexcept(false) {
 	if(can_run(resc)) return static_cast<int>(resc.cores) - static_cast<int>(req_resc.cores);
-	else throw nullptr; // actual exception doesn't matter, and this is quite fast
+	else throw std::invalid_argument("Job must be able to run on resources to calculate a fitness value");
 }
 
 bool job_can_run(const job_info *job, const resource_info resc) noexcept(true) {
