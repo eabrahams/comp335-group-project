@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "socket_client.h"
@@ -30,12 +32,12 @@ void all_to_largest(socket_client *client) {
 		free(resp);
 
 		size_t len = snprintf(NULL, 0, "%s %d %s %d", "SCHD", j.id, name, 0) + 1;
-		char *schd_str[len];
+		char schd_str[len];
 		snprintf(schd_str, len, "%s %d %s %d", "SCHD", j.id, name, 0);
 
 		bool scheduled = client_msg_resp(client, schd_str, "OK");
 		if (!scheduled) {
-			fprintf("%s%d%s\n", "Unable to schedule job ", j.id, " with command: ", schd_str);
+			fprintf(stderr, "%s%d%s%s\n", "Unable to schedule job ", j.id, " with command: ", schd_str);
 			exit(1);
 		}
 	}

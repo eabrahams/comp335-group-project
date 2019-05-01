@@ -68,8 +68,8 @@ bool client_msg_resp(socket_client *client, char *msg, char *expected_response) 
 	bool result = true;
 	client_send(client, msg);
 	char *response = client_receive(client);
-	if (!strcmp(response, expected_response)) {
-		fprintf(stderr, "%s%s\n", "server sent incorrect response: ", response);
+	if (strcmp(response, expected_response) != 0) {
+		fprintf(stderr, "%s%s%s%s%s\n", "expected '", expected_response, "' but received '", response, "'");
 		result = false;
 	}
 	free(response);
