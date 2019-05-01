@@ -29,14 +29,17 @@ void all_to_largest(socket_client *client) {
 			break;
 
 		job_info j = job_from_string(resp);
-		free(resp);
+		free(resp); // we don't need the response string anymore
 
+		/* snprintf returns the number of characters it wants to write, so we
+		 * call it with null and size 0 to get that number, and then add 1
+		 * because snprintf writes a null character to the end of the string. */
 		size_t len = snprintf(NULL, 0, "%s %d %s %d", "SCHD", j.id, name, 0) + 1;
 		char schd_str[len];
 		snprintf(schd_str, len, "%s %d %s %d", "SCHD", j.id, name, 0);
 
-		bool scheduled = client_msg_resp(client, schd_str, "OK");
-		if (!scheduled) {
+		bool success = client_msg_resp(client, schd_str, "OK");
+		if (!success) {
 			fprintf(stderr, "%s%d%s%s\n", "Unable to schedule job ", j.id, " with command: ", schd_str);
 			exit(1);
 		}
