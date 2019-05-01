@@ -7,12 +7,12 @@ static_assert(std::is_pod_v<job_info>, "job_info MUST be POD to be C-compatible!
 #include <cstdlib>
 
 job_info job_from_string(const char *jobstr) noexcept(true) {
-	job_info j;
 	if(strncmp(jobstr, "JOBN", 4) != 0) {
 		fprintf(stderr, "%s%s\n", "Bad job string: ", jobstr);
 		exit(1);
 	}
 
+	job_info j;
 	sscanf(jobstr + 5, "%d %d %d %d %d %d",
 		&j.submit_time,
 		&j.id,
