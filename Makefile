@@ -1,12 +1,14 @@
 VPATH = Scheduler/src
 
+BINARY = c-client
+
 CC = clang
 CFLAGS = -std=gnu11
 CXX = clang++
 CXXFLAGS = -std=gnu++17
 
 all: all_to_largest.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
-	$(CXX) $(CXXFLAGS) -I Scheduler/src -o c-client $^
+	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $(BINARY) $^
 
 main.o: main.c
 
@@ -21,5 +23,8 @@ resource_info.o: resource_info.cpp resource_info.h
 all_to_largest.o: all_to_largest.c all_to_largest.h
 
 clean:
-	rm -rf *.o
+	rm -f *.o
+
+clean-all:
+	rm -f *.o $(BINARY)
 
