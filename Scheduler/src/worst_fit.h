@@ -2,9 +2,6 @@
 #ifndef worst_fit_h_
 #define worst_fit_h_
 
-#include "system_config.h"
-#include "job_info.h"
-
 #ifdef __cplusplus
 extern "C" {
 #else
@@ -12,7 +9,10 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
-server_info *worst_fit(const system_config *config, const job_info *job) noexcept(true);
+// MUST go here so it gets wrapped exactly once by extern "C" {..}
+#include "socket_client.h"
+
+void worst_fit(socket_client *client) noexcept(true);
 
 #ifdef __cplusplus
 }

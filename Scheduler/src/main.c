@@ -1,4 +1,5 @@
 #include "socket_client.h"
+#include "all_to_largest.h"
 #include "worst_fit.h"
 
 int main(int argc, char **argv) {
