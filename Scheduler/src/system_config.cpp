@@ -90,9 +90,9 @@ system_config *parse_config(const char *path) noexcept(true) {
 		if(!get_positive_int_attribute(node, "limit", &type.limit)) break;
 		if(!get_unsigned_int_attribute(node, "bootupTime", &type.bootTime)) break;
 		if(!get_positive_float_attribute(node, "rate", &type.rate)) break;
-		if(!get_positive_int_attribute(node, "coreCount", &type.cores)) break;
-		if(!get_positive_int_attribute(node, "memory", &type.memory)) break;
-		if(!get_positive_int_attribute(node, "disk", &type.disk)) break;
+		if(!get_positive_int_attribute(node, "coreCount", &type.max_resc.cores)) break;
+		if(!get_positive_int_attribute(node, "memory", &type.max_resc.memory)) break;
+		if(!get_positive_int_attribute(node, "disk", &type.max_resc.disk)) break;
 		if(!copy_string_attribute(node, "type", &type.name)) break;
 
 		types.push_back(type);
@@ -113,7 +113,7 @@ system_config *parse_config(const char *path) noexcept(true) {
 	for(auto i = 0; i < cfg_num_types; ++i) {
 		server_type *type = cfg_types + i;
 		for(auto j = 0; j < type->limit; ++j) {
-			servers.push_back(server_info{ type, j, SS_OFFLINE, 0, type->cores, type->memory, type->disk });
+			servers.push_back(server_info{ type, j, SS_OFFLINE, 0, type->max_resc });
 		}
 	}
 
@@ -149,19 +149,23 @@ server_info *servers_by_type(const system_config *config, const server_type *typ
 	return nullptr;
 }
 
-bool update_server(server_info *server, server_state state, unsigned time, unsigned cores, unsigned memory, unsigned disk) noexcept(true) {
-	if(cores <= server->type->cores && memory <= server->type->memory && disk <= server->type->disk) {
+bool update_server(server_info *server, server_state state, unsigned time, resource_info resc) noexcept(true) {
+	if(resc <= server->type->max_resc) {
 		server->state = state;
-		server->avail_cores = cores;
-		server->avail_memory = memory;
-		server->avail_disk = disk;
-		return true;
+		server->avail_resc = resc;
 	} else return false;
 }
 
 void reset_server(server_info *server) noexcept(true) {
 	//TODO: figure out what avail_time is
-	server->avail_cores = server->type->cores;
-	server->avail_memory = server->type->memory;
-	server->avail_disk = server->type->disk;
+	server->avail_resc = server->type->max_resc;
 }
+
+bool server_can_run_job(const server_info *server, const job_info *job) noexcept(true) {
+	return server->avail_resc <= job->req_resc;
+};
+
+int server_fitness_for(const server_info *server, const job_info *job) noexcept(true) {
+	if(server_can_run_job(server, job)) return server->avail_resc.cores - job->req_resc.cores;
+	else return -1;
+};

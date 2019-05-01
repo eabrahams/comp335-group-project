@@ -1,5 +1,9 @@
+#pragma once
 #ifndef system_config_h_
 #define system_config_h_
+
+#include "resource_info.h"
+#include "job_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,9 +17,7 @@ typedef struct {
 	unsigned limit; // the maximum number of concurrent instances of this type
 	unsigned bootTime; // how long this type of server takes to start up
 	float rate;
-	unsigned cores; // how many CPU cores this server type offers
-	unsigned memory; // how much memory (in MB) this server type offers
-	unsigned disk; // how much disk space (in MB) this server type offers
+	resource_info max_resc; // the resources offered by this server type
 } server_type;
 
 typedef enum {
@@ -31,9 +33,7 @@ typedef struct {
 	const int id; // the type-unique identifier of this server
 	server_state state; // the current state of this server
 	unsigned avail_time;
-	unsigned avail_cores; // how many CPU cores this server has available
-	unsigned avail_memory; // how much memory this server has available
-	unsigned avail_disk; // how much disk space this server has available
+	resource_info avail_resc; // the available resources on this server
 } server_info;
 
 typedef struct system_config {
@@ -60,10 +60,16 @@ const server_type *type_by_name(const system_config *config, const char* name) n
 server_info *servers_by_type(const system_config *config, const server_type *type) noexcept(true);
 
 // validates the new resources for the server, returning true and updating if they're valid; false otherwise
-bool update_server(server_info *server, server_state state, unsigned time, unsigned cores, unsigned memory, unsigned disk) noexcept(true);
+bool update_server(server_info *server, server_state state, unsigned time, resource_info resc) noexcept(true);
 
 // reset the resources availiable on a server to default values
 void reset_server(server_info *server) noexcept(true);
+
+// whether the server can run a job
+bool server_can_run_job(const server_info *server, const job_info *job) noexcept(true);
+
+// the 'fitness' value for a job on a server
+int server_fitness_for(const server_info *server, const job_info *job) noexcept(true);
 
 #ifdef __cplusplus
 }
