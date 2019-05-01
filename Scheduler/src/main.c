@@ -2,12 +2,12 @@
 #include "system_config.h"
 
 void allToLargest(socket_client *client) {
-	system_config config = parse_config("system.xml");
+	system_config *config = parse_config("system.xml");
 	unsigned int i;
 	unsigned int largest_index = 0;
 	// start at 1, since we've set the index to 0
 	for (i = 1; i < config->num_types; i++)
-		if (config->types[i]->cores > config->types[largest_index]->cores)
+		if (config->types[i].cores > config->types[largest_index].cores)
 			largest_index = i;
 
 	while (true) {
