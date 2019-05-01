@@ -6,7 +6,7 @@ CXX = clang++
 CXXFLAGS = -std=gnu++17
 
 all: all_to_largest.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
-	$(CXX) $(CXXFLAGS) -I Scheduler/src -o Scheduler/bin/client $^
+	$(CXX) $(CXXFLAGS) -I Scheduler/src -o c-client $^
 
 main.o: main.c
 
