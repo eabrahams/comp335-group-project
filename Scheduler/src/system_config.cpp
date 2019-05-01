@@ -142,6 +142,7 @@ const server_type *type_by_name(const system_config *config, const char* name) n
 	return nullptr;
 };
 
+
 server_info *servers_by_type(const system_config *config, const server_type *type) noexcept(true) {
 	for(auto i = 0; i < config->num_servers; ++i) {
 		if(config->servers[i].type == type) return &config->servers[i];
@@ -157,15 +158,6 @@ bool update_server(server_info *server, server_state state, unsigned time, resou
 }
 
 void reset_server(server_info *server) noexcept(true) {
-	//TODO: figure out what avail_time is
+	//TODO: figure out what avail_time is, currently assuming it's "time until available"
 	server->avail_resc = server->type->max_resc;
 }
-
-bool server_can_run_job(const server_info *server, const job_info *job) noexcept(true) {
-	return server->avail_resc <= job->req_resc;
-};
-
-int server_fitness_for(const server_info *server, const job_info *job) noexcept(true) {
-	if(server_can_run_job(server, job)) return server->avail_resc.cores - job->req_resc.cores;
-	else return -1;
-};

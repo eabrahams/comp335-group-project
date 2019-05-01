@@ -1,5 +1,8 @@
 #include "system_config.h"
 #include "socket_client.h"
+#include "job_info.h"
+
+#include <stdio.h>
 
 void all_to_largest(socket_client *client) {
 	system_config *config = parse_config("system.xml");
@@ -10,10 +13,10 @@ void all_to_largest(socket_client *client) {
 	 * start at 1 because we have already set largest_index to 0, and we will be
 	 * comparing the type at index i to the one at largest_index */
 	for (i = 1; i < config->num_types; i++)
-		if (config->types[i]->cores > config->types[largest_index]->cores)
+		if (config->types[i].max_resc.cores > config->types[largest_index].max_resc.cores)
 			largest_index = i;
 
-	char *name = config->types[largest_index]->name;
+	char *name = config->types[largest_index].name;
 	
 	/* start receiving jobs and send them all to largest server */
 	while (true) {
@@ -22,7 +25,7 @@ void all_to_largest(socket_client *client) {
 		if (strncmp(resp, "NONE", 4) == 0)
 			break;
 
-		job *j = job_from_string(resp);
+		job_info *j = job_from_string(resp);
 
 		size_t len = snprintf(NULL, 0, "%s %d %s %d", "SCHD", j->id, name, 0) + 1;
 		char *schd_str[len];
@@ -38,6 +41,6 @@ void all_to_largest(socket_client *client) {
 		free(resp);
 	}
 
-	client_send("QUIT");
+	client_send(client, "QUIT");
 }
 

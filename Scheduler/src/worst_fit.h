@@ -12,7 +12,7 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
-void worst_fit(system_config *config, const job_info *job) noexcept(true);
+server_info *worst_fit(const system_config *config, const job_info *job) noexcept(true);
 
 #ifdef __cplusplus
 }

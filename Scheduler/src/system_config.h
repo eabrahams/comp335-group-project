@@ -3,7 +3,6 @@
 #define system_config_h_
 
 #include "resource_info.h"
-#include "job_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,11 +35,11 @@ typedef struct {
 	resource_info avail_resc; // the available resources on this server
 } server_info;
 
-typedef struct system_config {
-	const server_type *const types;
-	const unsigned num_types;
-	server_info *const servers;
-	const unsigned num_servers;
+typedef struct {
+	const server_type *const types; // collection of types, ordered as parsed from XML
+	const unsigned num_types; // number of types
+	server_info *const servers; // flat collection of servers, ordered by type then id
+	const unsigned num_servers; // number of servers
 } system_config;
 
 /*
@@ -64,12 +63,6 @@ bool update_server(server_info *server, server_state state, unsigned time, resou
 
 // reset the resources availiable on a server to default values
 void reset_server(server_info *server) noexcept(true);
-
-// whether the server can run a job
-bool server_can_run_job(const server_info *server, const job_info *job) noexcept(true);
-
-// the 'fitness' value for a job on a server
-int server_fitness_for(const server_info *server, const job_info *job) noexcept(true);
 
 #ifdef __cplusplus
 }

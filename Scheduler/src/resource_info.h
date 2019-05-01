@@ -18,12 +18,12 @@ typedef struct {
 #ifdef __cplusplus
 }
 
-bool operator<(const resource_info &lhs, const resource_info &rhs);
-bool operator<=(const resource_info &lhs, const resource_info &rhs);
-bool operator>(const resource_info &lhs, const resource_info &rhs);
-bool operator>=(const resource_info &lhs, const resource_info &rhs);
-bool operator==(const resource_info &lhs, const resource_info &rhs);
-bool operator!=(const resource_info &lhs, const resource_info &rhs);
+bool operator<(const resource_info &lhs, const resource_info &rhs) noexcept(true);
+bool operator<=(const resource_info &lhs, const resource_info &rhs) noexcept(true);
+bool operator>(const resource_info &lhs, const resource_info &rhs) noexcept(true);
+bool operator>=(const resource_info &lhs, const resource_info &rhs) noexcept(true);
+bool operator==(const resource_info &lhs, const resource_info &rhs) noexcept(true);
+bool operator!=(const resource_info &lhs, const resource_info &rhs) noexcept(true);
 #else
 #undef noexcept
 #endif
