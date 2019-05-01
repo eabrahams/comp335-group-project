@@ -104,7 +104,7 @@ system_config *parse_config(const char *path) noexcept(true) {
 
 	// have to make a copy of the server_type-s first, otherwise the vector will
 	//.. still own the memory they live in when we initialize server_info-s with them
-	size_t cfg_num_types = types.size();
+	unsigned cfg_num_types = types.size();
 	server_type *cfg_types = static_cast<server_type *>(malloc(sizeof(server_type)*cfg_num_types));
 	memcpy(cfg_types, types.data(), sizeof(server_type)*cfg_num_types);
 
@@ -117,7 +117,7 @@ system_config *parse_config(const char *path) noexcept(true) {
 		}
 	}
 
-	size_t cfg_num_servers = servers.size();
+	unsigned cfg_num_servers = servers.size();
 	server_info *cfg_servers = static_cast<server_info *>(malloc(sizeof(server_info)*cfg_num_servers));
 	memcpy(cfg_servers, servers.data(), sizeof(server_info)*cfg_num_servers);
 

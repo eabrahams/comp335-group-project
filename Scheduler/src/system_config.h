@@ -38,9 +38,9 @@ typedef struct {
 
 typedef struct system_config {
 	const server_type *const types;
-	const size_t num_types;
+	const unsigned num_types;
 	server_info *const servers;
-	const size_t num_servers;
+	const unsigned num_servers;
 } system_config;
 
 /*
