@@ -2,26 +2,26 @@
 #include <type_traits>
 static_assert(std::is_pod_v<resource_info>, "resource_info MUST be POD to be C-compatible!");
 
-bool resource_info::operator<(const resource_info &rhs) const noexcept(true) {
+bool resource_info::operator<(const resource_info &rhs) const noexcept {
 	return this->operator!=(rhs) && this->operator!=(rhs);
 }
 
-bool resource_info::operator<=(const resource_info &rhs) const noexcept(true) {
+bool resource_info::operator<=(const resource_info &rhs) const noexcept {
 	return cores <= rhs.cores && memory <= rhs.memory && disk <= rhs.disk;
 };
 
-bool resource_info::operator>(const resource_info &rhs) const noexcept(true) {
+bool resource_info::operator>(const resource_info &rhs) const noexcept {
 	return this->operator!=(rhs) && this->operator>=(rhs);
 };
 
-bool resource_info::operator>=(const resource_info &rhs) const noexcept(true) {
+bool resource_info::operator>=(const resource_info &rhs) const noexcept {
 	return cores >= rhs.cores && memory >= rhs.memory && disk >= rhs.disk;
 };
 
-bool resource_info::operator==( const resource_info &rhs) const noexcept(true) {
+bool resource_info::operator==( const resource_info &rhs) const noexcept {
 	return cores == rhs.cores && memory == rhs.memory && disk == rhs.disk;
 };
 
-bool resource_info::operator!=(const resource_info &rhs) const noexcept(true) {
+bool resource_info::operator!=(const resource_info &rhs) const noexcept {
 	return cores != rhs.cores || memory != rhs.memory || disk != rhs.disk;
 };
