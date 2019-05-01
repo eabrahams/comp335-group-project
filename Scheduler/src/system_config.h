@@ -19,9 +19,9 @@ typedef struct server_type {
 	resource_info max_resc; // the resources offered by this server type
 } server_type;
 
-typedef enum {
-	SS_OFFLINE, // server is offline
-	SS_STARTING, // server is starting up, but hasn't finished yet
+typedef enum server_state {
+	SS_INACTIVE, // server is offline
+	SS_BOOTING, // server is starting up, but hasn't finished yet
 	SS_IDLE, // server is running, but not doing anything
 	SS_ACTIVE, // server is running, and currently doing something
 	SS_UNAVAILABLE // server is otherwise unavailable
