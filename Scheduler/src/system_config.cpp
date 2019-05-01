@@ -35,23 +35,9 @@ inline namespace {
 	*/
 	bool get_unsigned_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
 		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-			std::cerr << "Parser: bad member element: must have non-negative integer attribute '" << attr_name << "'\n";
+			std::cerr << "Parser: bad member element: must have unsigned integer attribute '" << attr_name << "'\n";
 			return false;
 		} else return true;
-	}
-
-	/*
-	check if an element has a positive integer attribute with a given name,
-	copying the value to dest_ptr and returning true if it does, otherwise
-	returning false and logging to stderr.
-	*/
-	bool get_positive_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept(true) {
-		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-			std::cerr << "Parser: bad member element: must have positive integer attribute '" << attr_name << "'\n";
-		} else if(*dest_ptr == 0) {
-			std::cerr << "Parser: bad attribute: '" << attr_name << "' must be a positive integer (was 0)\n";
-		} else return true;
-		return false;
 	}
 
 	/*
@@ -91,12 +77,12 @@ system_config *parse_config(const char *path) noexcept(true) {
 	for(node = nodes->FirstChildElement(); node != nullptr && elem_name_is(node, "server"); node = node->NextSiblingElement()) {
 		server_type type;
 
-		if(!get_positive_int_attribute(node, "limit", &type.limit)) break;
+		if(!get_unsigned_int_attribute(node, "limit", &type.limit)) break;
 		if(!get_unsigned_int_attribute(node, "bootupTime", &type.bootTime)) break;
 		if(!get_positive_float_attribute(node, "rate", &type.rate)) break;
-		if(!get_positive_int_attribute(node, "coreCount", &type.max_resc.cores)) break;
-		if(!get_positive_int_attribute(node, "memory", &type.max_resc.memory)) break;
-		if(!get_positive_int_attribute(node, "disk", &type.max_resc.disk)) break;
+		if(!get_unsigned_int_attribute(node, "coreCount", &type.max_resc.cores)) break;
+		if(!get_unsigned_int_attribute(node, "memory", &type.max_resc.memory)) break;
+		if(!get_unsigned_int_attribute(node, "disk", &type.max_resc.disk)) break;
 		if(!copy_string_attribute(node, "type", &type.name)) break;
 
 		types.push_back(type);
