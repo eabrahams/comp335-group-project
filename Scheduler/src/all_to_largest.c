@@ -46,5 +46,7 @@ void all_to_largest(socket_client *client) {
 	}
 
 	client_send(client, "QUIT");
+
+	free_config(config);
 }
 
