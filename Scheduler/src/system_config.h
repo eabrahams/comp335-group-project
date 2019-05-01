@@ -28,18 +28,18 @@ typedef enum {
 } server_state;
 
 typedef struct {
-	const server_type *const type; // the type of this server
-	const int id; // the type-unique identifier of this server
+	const server_type *type; // the type of this server
+	int id; // the type-unique identifier of this server
 	server_state state; // the current state of this server
 	unsigned avail_time;
 	resource_info avail_resc; // the available resources on this server
 } server_info;
 
 typedef struct {
-	const server_type *const types; // collection of types, ordered as parsed from XML
-	const unsigned num_types; // number of types
-	server_info *const servers; // flat collection of servers, ordered by type then id
-	const unsigned num_servers; // number of servers
+	const server_type *types; // collection of types, ordered as parsed from XML
+	unsigned num_types; // number of types
+	server_info *servers; // flat collection of servers, ordered by type then id
+	unsigned num_servers; // number of servers
 } system_config;
 
 /*

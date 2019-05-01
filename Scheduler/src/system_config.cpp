@@ -1,10 +1,14 @@
+#include "system_config.h"
+#include <type_traits>
+static_assert(std::is_pod_v<server_type>, "server_type MUST be POD to be C-safe!");
+static_assert(std::is_pod_v<server_info>, "server_info MUST be POD to be C-safe!");
+static_assert(std::is_pod_v<system_config>, "system_config MUST be POD to be C-safe!");
+
 #include <tinyxml.h>
 #include <iostream>
 #include <cstring>
 #include <memory>
 #include <vector>
-
-#include "system_config.h"
 
 inline namespace {
 	/*

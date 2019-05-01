@@ -17,6 +17,10 @@ typedef struct {
 	unsigned est_runtime;
 	resource_info req_resc;
 	bool complete;
+#ifdef __cplusplus
+	bool can_run(const resource_info &resc) const noexcept(true);
+	int fitness(const resource_info &resc) const noexcept(false);
+#endif
 } job_info;
 
 job_info job_from_string(const char *jobstr) noexcept(true);

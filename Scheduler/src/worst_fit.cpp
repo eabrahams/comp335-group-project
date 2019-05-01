@@ -11,8 +11,8 @@ server_info *worst_fit(const system_config *config, const job_info *job) noexcep
 	worst_fit = alt_fit = ini_fit = std::numeric_limits<int>::min();
 	for(auto i = 0; i < config->num_servers; ++i) {
 		server_info *server = config->servers + i;
-		if(job_can_run(job, server->avail_resc)) {
-			int fitness = job_fitness(job, server->avail_resc);
+		if(job->can_run(server->avail_resc)) {
+			int fitness = job->fitness(server->avail_resc);
 			if(fitness > worst_fit && server->state == server_state::SS_IDLE) {
 				worst_fit = fitness;
 				worst_server = server;
