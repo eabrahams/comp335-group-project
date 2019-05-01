@@ -13,7 +13,7 @@ extern "C" {
 
 typedef struct {
 	unsigned submit_time;
-	int id;
+	unsigned id;
 	unsigned est_runtime;
 	resource_info req_resc;
 	bool complete;
