@@ -26,3 +26,6 @@ resource_info.o: resource_info.cpp resource_info.h
 all_to_largest.o: all_to_largest.c all_to_largest.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+clean:
+	rm -rf *.o
+
