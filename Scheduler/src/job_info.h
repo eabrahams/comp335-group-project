@@ -11,7 +11,7 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
-typedef struct {
+typedef struct job_info {
 	unsigned submit_time;
 	unsigned id;
 	unsigned est_runtime;

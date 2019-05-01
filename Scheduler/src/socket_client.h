@@ -2,6 +2,7 @@
 #define socket_client_h_
 
 #include <sys/socket.h>
+#include <stdbool.h>
 
 #define LOCALHOST "127.0.0.1"
 #define DEFAULT_PORT 8096

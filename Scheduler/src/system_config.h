@@ -11,7 +11,7 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
-typedef struct {
+typedef struct server_type {
 	char *name; // the human-readable name of the server type
 	unsigned limit; // the maximum number of concurrent instances of this type
 	unsigned bootTime; // how long this type of server takes to start up
@@ -27,15 +27,19 @@ typedef enum {
 	SS_UNAVAILABLE // server is otherwise unavailable
 } server_state;
 
-typedef struct {
+typedef struct server_info {
 	const server_type *type; // the type of this server
 	int id; // the type-unique identifier of this server
 	server_state state; // the current state of this server
 	unsigned avail_time;
 	resource_info avail_resc; // the available resources on this server
+#ifdef __cplusplus
+	bool update(const server_state &state, const unsigned &time, const resource_info &resc) noexcept(true);
+	void reset() noexcept(true);
+#endif
 } server_info;
 
-typedef struct {
+typedef struct system_config {
 	const server_type *types; // collection of types, ordered as parsed from XML
 	unsigned num_types; // number of types
 	server_info *servers; // flat collection of servers, ordered by type then id

@@ -154,14 +154,23 @@ server_info *servers_by_type(const system_config *config, const server_type *typ
 	return nullptr;
 }
 
-bool update_server(server_info *server, server_state state, unsigned time, resource_info resc) noexcept(true) {
-	if(resc <= server->type->max_resc) {
-		server->state = state;
-		server->avail_resc = resc;
+bool server_info::update(const server_state &state, const unsigned &time, const resource_info &resc) noexcept(true) {
+	if(resc <= type->max_resc) {
+		this->state = state;
+		this->avail_resc = resc;
+		return true;
 	} else return false;
+}
+
+bool update_server(server_info *server, server_state state, unsigned time, resource_info resc) noexcept(true) {
+	return server->update(state, time, resc);
+}
+
+void server_info::reset() noexcept(true) {
+	avail_resc = type->max_resc;
 }
 
 void reset_server(server_info *server) noexcept(true) {
 	//TODO: figure out what avail_time is, currently assuming it's "time until available"
-	server->avail_resc = server->type->max_resc;
+	server->reset();
 }

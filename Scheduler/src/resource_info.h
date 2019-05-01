@@ -9,7 +9,7 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
-typedef struct {
+typedef struct resource_info {
 	unsigned cores; // CPU cores
 	unsigned memory; // memory in MB
 	unsigned disk; // disk in MB
