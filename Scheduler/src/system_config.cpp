@@ -92,26 +92,27 @@ system_config *parse_config(const char *path) noexcept(true) {
 		return nullptr;
 	} // otherwise success
 
+	system_config config;
+
 	// have to make a copy of the server_type-s first, otherwise the vector will
 	//.. still own the memory they live in when we initialize server_info-s with them
-	unsigned cfg_num_types = types.size();
-	server_type *cfg_types = static_cast<server_type *>(malloc(sizeof(server_type)*cfg_num_types));
-	memcpy(cfg_types, types.data(), sizeof(server_type)*cfg_num_types);
+	config.num_types = types.size();
+	config.types = static_cast<server_type *>(malloc(sizeof(server_type)*config.num_types));
+	memcpy(const_cast<server_type *>(config.types), types.data(), sizeof(server_type)*config.num_types);
 
 	// use a vector for this, again to avoid over-alloc or realloc
 	auto servers = std::vector<server_info>();
-	for(auto i = 0; i < cfg_num_types; ++i) {
-		server_type *type = cfg_types + i;
+	for(auto i = 0; i < config.num_types; ++i) {
+		auto *type = config.types + i;
 		for(auto j = 0; j < type->limit; ++j) {
 			servers.push_back(server_info{ type, j, server_state::SS_INACTIVE, 0, type->max_resc });
 		}
 	}
 
-	unsigned cfg_num_servers = servers.size();
-	server_info *cfg_servers = static_cast<server_info *>(malloc(sizeof(server_info)*cfg_num_servers));
-	memcpy(cfg_servers, servers.data(), sizeof(server_info)*cfg_num_servers);
+	config.num_servers = servers.size();
+	config.servers = static_cast<server_info *>(malloc(sizeof(server_info)*config.num_servers));
+	memcpy(config.servers, servers.data(), sizeof(server_info)*config.num_servers);
 
-	system_config config{ cfg_types, cfg_num_types, cfg_servers, cfg_num_servers };
 	system_config *cfg_ptr = static_cast<system_config *>(malloc(sizeof(system_config)));
 	memcpy(cfg_ptr, &config, sizeof(system_config));
 

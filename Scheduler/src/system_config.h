@@ -5,6 +5,7 @@
 #include "resource_info.h"
 
 #ifdef __cplusplus
+#include <cstddef>
 extern "C" {
 #else
 #define noexcept(BOOL)
@@ -41,9 +42,9 @@ typedef struct server_info {
 
 typedef struct system_config {
 	const server_type *types; // collection of types, ordered as parsed from XML
-	unsigned num_types; // number of types
+	size_t num_types; // number of types
 	server_info *servers; // flat collection of servers, ordered by type then id
-	unsigned num_servers; // number of servers
+	size_t num_servers; // number of servers
 } system_config;
 
 /*
