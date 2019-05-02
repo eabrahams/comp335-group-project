@@ -11,7 +11,7 @@
 #include "job_info.h"
 #include "resource_info.h"
 
-/* calculate the difference between two numbers (works for unsigned types) */
+/* calculate the difference between two numbers */
 #define difference(x,y) ((((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y)))
 #define SCHD_FORMAT "%s %d %s %d"
 
@@ -76,13 +76,6 @@ void best_first(socket_client *client) {
 			if (!job_can_run(&job, server_resc))
 				continue;
 
-			/* The values here are all unsigned so simply subtracting one
-			 * from another risks an integer underflow. We can't use abs()
-			 * for unsigned types (there's no sign to remove), so we have
-			 * to find something else. The difference() macro at the top
-			 * of the file solves this by calculating which is smaller and
-			 * which is larger. */
-			//fitness = difference(job.req_resc.cores, server_resc.cores);
 			int fitness = job_fitness(&job, server_resc);
 			if (fitness < bf.value || (fitness == bf.value && config->servers[i].avail_time < bf.min_avail)) {
 				bf.value = fitness;
