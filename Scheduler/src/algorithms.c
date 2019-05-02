@@ -11,7 +11,7 @@
 #include "job_info.h"
 #include "resource_info.h"
 
-#define unsigned_difference(x,y) (((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y))
+#define difference(x,y) ((((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y)))
 #define SCHD_FORMAT "%s %d %s %d"
 
 void all_to_largest(socket_client *client) {
@@ -68,7 +68,7 @@ bool is_best_fit(best_fit bf, server_info server, job_info job) {
 	 * underflow if we simply subtract one from the other. We can't use abs()
 	 * because there is no sign to remove, so instead we have to do a few extra
 	 * steps to get the correct value		*/
-	uint32_t fitness = unsigned_difference(job.req_resc.cores, server.avail_resc.cores);
+	uint32_t fitness = difference(job.req_resc.cores, server.avail_resc.cores);
 	//unsigned int fitness = abs(job.req_resc.cores - server.avail_resc.cores);
 	return (fitness < bf.value ||
 			(fitness == bf.value && server.avail_time < bf.min_avail));
