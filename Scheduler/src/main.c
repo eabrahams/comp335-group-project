@@ -6,7 +6,7 @@
 #include "socket_client.h"
 #include "algorithms.h"
 
-typedef enum { ALL_TO_LARGEST, FIRST_FIT, BEST_FIT, WORST_FIT } algorithm;
+typedef enum { ALL_TO_LARGEST, FIRST_FIT, BEST_FIRST, WORST_FIT } algorithm;
 
 void usage(char *prog);
 algorithm get_algorithm(char *name);
@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
 		case FIRST_FIT:
 			puts("not yet implemented");
 			break;
-		case BEST_FIT:
-			best_fit(client);
+		case BEST_FIRST:
+			best_first(client);
 			break;
 		case WORST_FIT:
 			puts("not yet implemented");
@@ -59,7 +59,7 @@ algorithm get_algorithm(char *name) {
 				a = FIRST_FIT;
 				break;
 			case 'b':
-				a = BEST_FIT;
+				a = BEST_FIRST;
 				break;
 			case 'w':
 				a = WORST_FIT;
@@ -71,7 +71,7 @@ algorithm get_algorithm(char *name) {
 }
 
 void usage(char *prog) {
-	printf("%s%s\n", name, " [-a ALGORITHM]");
+	printf("%s%s\n", prog, " [-a ALGORITHM]");
 	exit(1);
 }
 
