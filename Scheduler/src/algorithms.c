@@ -3,10 +3,16 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
+#include <stdint.h>
 
+#include "algorithms.h"
 #include "socket_client.h"
 #include "system_config.h"
 #include "job_info.h"
+#include "resource_info.h"
+
+#define unsigned_difference(x,y) (((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y))
+#define SCHD_FORMAT "%s %d %s %d"
 
 void all_to_largest(socket_client *client) {
 	system_config *config = parse_config("system.xml");
@@ -51,9 +57,26 @@ void all_to_largest(socket_client *client) {
 	free_config(config);
 }
 
+bool resources_available(resource_info server, resource_info job) {
+	return (server.cores >= job.cores &&
+			server.memory >= job.memory &&
+			server.disk >= job.disk);
+}
+
+bool is_best_fit(best_fit bf, server_info server, job_info job) {
+	/* all values we're dealing with here are unsigned so we risk an integer
+	 * underflow if we simply subtract one from the other. We can't use abs()
+	 * because there is no sign to remove, so instead we have to do a few extra
+	 * steps to get the correct value		*/
+	uint32_t fitness = unsigned_difference(job.req_resc.cores, server.avail_resc.cores);
+	//unsigned int fitness = abs(job.req_resc.cores - server.avail_resc.cores);
+	return (fitness < bf.value ||
+			(fitness == bf.value && server.avail_time < bf.min_avail));
+}
+
 void best_first(socket_client *client) {
-	unsigned int best_fit, min_avail;
-	best_fit = min_avail = UINT_MAX;
+	//unsigned int best_fit, min_avail;
+	//best_fit = min_avail = UINT_MAX;
 	
 	system_config *config = parse_config("system.xml");
 	while (true) {
@@ -62,15 +85,49 @@ void best_first(socket_client *client) {
 		if (strncmp(resp, "NONE", 4) == 0)
 			break;
 
-		job_info j = job_from_string(resp);
+		job_info job = job_from_string(resp);
 		free(resp);
-		int fitness;
-		unsigned int i;
+
+		best_fit bf = { UINT_MAX, UINT_MAX, 0, false };
+		unsigned int i, fitness;
 		for (i = 0; i < config->num_servers; i++) {
-			// find best server for job
+			resource_info server_resc = config->servers[i].avail_resc;
+			if (!resources_available(server_resc, job.req_resc))
+				continue;
+
+			if (is_best_fit(bf, config->servers[i], job)) {
+				bf.value = fitness;
+				bf.min_avail = config->servers[i].avail_time;
+				bf.index = i;
+				bf.found = true;
+			}
+		}
+
+		if (bf.found) {
+			bool success = schedule_job(client, &job, &config->servers[i]);
+			if (!success) {
+				exit(1);
+			}
+		} else {
+			fputs("best not found", stderr);
 		}
 	}
 
 	free_config(config);
+}
+
+bool schedule_job(socket_client *client, job_info *job, server_info *server) {
+	size_t len = snprintf(NULL, 0, SCHD_FORMAT,
+			"SCHD",
+			job->id,
+			server->type->name,
+			server->id) + 1;
+	char schd[len];
+	snprintf(schd, len, SCHD_FORMAT,
+			"SCHD",
+			job->id,
+			server->type->name,
+			server->id);
+	return client_msg_resp(client, schd, "OK");
 }
 

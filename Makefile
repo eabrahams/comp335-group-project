@@ -1,6 +1,6 @@
 VPATH = Scheduler/src
 
-BINARY = c-client
+BINARY = ds-client
 
 CC = clang
 CFLAGS = -std=gnu11 -Wall -Wextra -pedantic
