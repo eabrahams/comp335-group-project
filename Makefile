@@ -3,7 +3,7 @@ VPATH = Scheduler/src
 BINARY = c-client
 
 CC = clang
-CFLAGS = -std=gnu11
+CFLAGS = -std=gnu11 -Wall -Wextra -pedantic
 CXX = clang++
 CXXFLAGS = -std=gnu++17
 
