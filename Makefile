@@ -7,7 +7,7 @@ CFLAGS = -std=gnu11
 CXX = clang++
 CXXFLAGS = -std=gnu++17
 
-all: all_to_largest.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
+all: algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
 	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $(BINARY) $^
 
 main.o: main.c
@@ -20,7 +20,7 @@ job_info.o: job_info.cpp job_info.h
 
 resource_info.o: resource_info.cpp resource_info.h
 
-all_to_largest.o: all_to_largest.c all_to_largest.h
+algorithms.o: algorithms.c algorithms.h
 
 clean:
 	rm -f *.o
