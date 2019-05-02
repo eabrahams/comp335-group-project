@@ -7,8 +7,11 @@ CFLAGS = -std=gnu11 -Wall -Wextra -pedantic
 CXX = clang++
 CXXFLAGS = -std=gnu++17
 
-all: algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
-	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $(BINARY) $^
+.PHONY: all
+all: $(BINARY)
+
+$(BINARY): algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
+	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $@ $^
 
 main.o: main.c
 
