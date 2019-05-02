@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
 			puts("not yet implemented");
 			break;
 	}
+
+	client_free(client);
 	// update_server(server_of_type(config, type) + id, state, time, cores, memory, disk);
 	return 0;
 }

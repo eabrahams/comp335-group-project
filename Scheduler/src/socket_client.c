@@ -43,6 +43,11 @@ socket_client *client_init(char *host, int port) {
 	return client;
 }
 
+void client_free(socket_client *client) {
+	free(client->socket);
+	free(client);
+}
+
 /* sends a null-terminated string to the server over
  * a socket */
 void client_send(socket_client *client, const char *msg) {

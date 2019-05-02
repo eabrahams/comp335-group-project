@@ -13,6 +13,7 @@ typedef struct {
 } socket_client;
 
 socket_client *client_init(char *host, int port);
+void client_free(socket_client *client);
 void client_send(socket_client *client, const char *msg);
 bool client_msg_resp(socket_client *client, const char *msg, const char *expected_response);
 char *client_receive(socket_client *client);
