@@ -12,8 +12,8 @@ void usage(char *prog);
 algorithm get_algorithm(char *name);
 
 int main(int argc, char **argv) {
-	unsigned int i;
 	char *algstr;
+	int i;
 	for (i = 1; i < argc; i++) {
 		if (strlen(argv[i]) < 2 || argv[i][0] != '-')
 			usage(argv[0]);
