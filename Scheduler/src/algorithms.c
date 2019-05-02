@@ -11,7 +11,7 @@
 #include "job_info.h"
 #include "resource_info.h"
 
-/* calculate the difference between two numbers */
+/* calculate the difference between two numbers (works for unsigned types) */
 #define difference(x,y) ((((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y)))
 #define SCHD_FORMAT "%s %d %s %d"
 
@@ -64,21 +64,7 @@ bool resources_available(resource_info server, resource_info job) {
 			server.disk >= job.disk);
 }
 
-bool is_best_fit(best_fit bf, server_info server, job_info job) {
-	/* all values we're dealing with here are unsigned so we risk an integer
-	 * underflow if we simply subtract one from the other. We can't use abs()
-	 * because there is no sign to remove, so instead we have to do a few extra
-	 * steps to get the correct value (check the difference macro at the top) */
-	uint32_t fitness = difference(job.req_resc.cores, server.avail_resc.cores);
-	//unsigned int fitness = abs(job.req_resc.cores - server.avail_resc.cores);
-	return (fitness < bf.value ||
-			(fitness == bf.value && server.avail_time < bf.min_avail));
-}
-
 void best_first(socket_client *client) {
-	//unsigned int best_fit, min_avail;
-	//best_fit = min_avail = UINT_MAX;
-	
 	system_config *config = parse_config("system.xml");
 	while (true) {
 		client_send(client, "REDY");
@@ -96,7 +82,14 @@ void best_first(socket_client *client) {
 			if (!resources_available(server_resc, job.req_resc))
 				continue;
 
-			if (is_best_fit(bf, config->servers[i], job)) {
+			/* The values here are all unsigned so simply subtracting one
+			 * from another risks an integer underflow. We can't use abs()
+			 * for unsigned types (there's no sign to remove), so we have
+			 * to find something else. The difference() macro at the top
+			 * of the file solves this by calculating which is smaller and
+			 * which is larger. */
+			fitness = difference(job.req_resc.cores, server_resc.cores);
+			if (fitness < bf.value || (fitness == bf.value && config->servers[i].avail_time < bf.min_avail)) {
 				bf.value = fitness;
 				bf.min_avail = config->servers[i].avail_time;
 				bf.index = i;
@@ -104,14 +97,13 @@ void best_first(socket_client *client) {
 			}
 		}
 
-		if (bf.found) {
-			bool success = schedule_job(client, &job, &config->servers[i]);
-			if (!success) {
-				exit(1);
-			}
-		} else {
+		bool success = false;
+		if (bf.found)
+			success = schedule_job(client, &job, &config->servers[i]);
+		else
 			fputs("best not found", stderr);
-		}
+		if (!success)
+			exit(1);
 	}
 
 	free_config(config);
