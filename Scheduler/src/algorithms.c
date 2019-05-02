@@ -58,12 +58,6 @@ void all_to_largest(socket_client *client) {
 	free_config(config);
 }
 
-bool resources_available(resource_info server, resource_info job) {
-	return (server.cores >= job.cores &&
-			server.memory >= job.memory &&
-			server.disk >= job.disk);
-}
-
 void best_first(socket_client *client) {
 	system_config *config = parse_config("system.xml");
 	while (true) {
@@ -79,7 +73,7 @@ void best_first(socket_client *client) {
 		unsigned int i, fitness;
 		for (i = 0; i < config->num_servers; i++) {
 			resource_info server_resc = config->servers[i].avail_resc;
-			if (!resources_available(server_resc, job.req_resc))
+			if (!job_can_run(&job, server_resc))
 				continue;
 
 			/* The values here are all unsigned so simply subtracting one
