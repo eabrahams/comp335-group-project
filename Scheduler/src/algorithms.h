@@ -7,8 +7,8 @@
 #include "resource_info.h"
 
 typedef struct {
-	unsigned int value;
-	unsigned int min_avail;
+	int value;
+	int min_avail;
 	unsigned int index;
 	bool found;
 } best_fit;

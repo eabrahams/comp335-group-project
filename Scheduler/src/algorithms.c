@@ -70,7 +70,7 @@ void best_first(socket_client *client) {
 		free(resp);
 
 		best_fit bf = { UINT_MAX, UINT_MAX, 0, false };
-		unsigned int i, fitness;
+		unsigned int i;
 		for (i = 0; i < config->num_servers; i++) {
 			resource_info server_resc = config->servers[i].avail_resc;
 			if (!job_can_run(&job, server_resc))
@@ -82,7 +82,8 @@ void best_first(socket_client *client) {
 			 * to find something else. The difference() macro at the top
 			 * of the file solves this by calculating which is smaller and
 			 * which is larger. */
-			fitness = difference(job.req_resc.cores, server_resc.cores);
+			//fitness = difference(job.req_resc.cores, server_resc.cores);
+			int fitness = job_fitness(&job, server_resc);
 			if (fitness < bf.value || (fitness == bf.value && config->servers[i].avail_time < bf.min_avail)) {
 				bf.value = fitness;
 				bf.min_avail = config->servers[i].avail_time;
