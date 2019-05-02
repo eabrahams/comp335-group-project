@@ -11,6 +11,7 @@
 #include "job_info.h"
 #include "resource_info.h"
 
+/* calculate the difference between two numbers */
 #define difference(x,y) ((((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y)))
 #define SCHD_FORMAT "%s %d %s %d"
 
@@ -67,7 +68,7 @@ bool is_best_fit(best_fit bf, server_info server, job_info job) {
 	/* all values we're dealing with here are unsigned so we risk an integer
 	 * underflow if we simply subtract one from the other. We can't use abs()
 	 * because there is no sign to remove, so instead we have to do a few extra
-	 * steps to get the correct value		*/
+	 * steps to get the correct value (check the difference macro at the top) */
 	uint32_t fitness = difference(job.req_resc.cores, server.avail_resc.cores);
 	//unsigned int fitness = abs(job.req_resc.cores - server.avail_resc.cores);
 	return (fitness < bf.value ||
