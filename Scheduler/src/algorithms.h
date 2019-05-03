@@ -8,7 +8,7 @@
 
 typedef struct {
 	int value;
-	int min_avail;
+	unsigned int min_avail;
 	unsigned int index;
 	bool found;
 } best_fit;
@@ -16,7 +16,7 @@ typedef struct {
 void all_to_largest(socket_client *client);
 void best_first(socket_client *client);
 bool resources_available(resource_info server, resource_info job);
-bool schedule_job(socket_client *client, job_info *job, server_info *server);
+bool schedule_job(socket_client *client, job_info job, server_info server);
 bool is_best_fit(best_fit bf, server_info server, job_info job);
 
 #endif

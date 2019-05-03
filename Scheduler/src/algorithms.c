@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
-#include <stdint.h>
 
 #include "algorithms.h"
 #include "socket_client.h"
@@ -13,7 +12,7 @@
 
 /* calculate the difference between two numbers */
 #define difference(x,y) ((((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y)))
-#define SCHD_FORMAT "%s %d %s %d"
+#define SCHD_FORMAT "%s %u %s %d"
 
 void all_to_largest(socket_client *client) {
 	system_config *config = parse_config("system.xml");
@@ -69,7 +68,7 @@ void best_first(socket_client *client) {
 		job_info job = job_from_string(resp);
 		free(resp);
 
-		best_fit bf = { UINT_MAX, UINT_MAX, 0, false };
+		best_fit bf = { INT_MAX, UINT_MAX, 0, false };
 		unsigned int i;
 		for (i = 0; i < config->num_servers; i++) {
 			resource_info server_resc = config->servers[i].avail_resc;
@@ -85,30 +84,26 @@ void best_first(socket_client *client) {
 			}
 		}
 
+
 		bool success = false;
-		if (bf.found)
-			success = schedule_job(client, &job, &config->servers[i]);
-		else
-			fputs("best not found", stderr);
+		if (bf.found) {
+			success = schedule_job(client, job, config->servers[bf.index]);
+		} else {
+			fprintf(stderr, "best not found for job %d\n", job.id);
+		}
 		if (!success)
-			exit(1);
+			break;
 	}
 
+	client_send(client, "QUIT");
 	free_config(config);
 }
 
-bool schedule_job(socket_client *client, job_info *job, server_info *server) {
-	size_t len = snprintf(NULL, 0, SCHD_FORMAT,
-			"SCHD",
-			job->id,
-			server->type->name,
-			server->id) + 1;
+bool schedule_job(socket_client *client, job_info job, server_info server) {
+	size_t len;
+	len = snprintf(NULL, 0, SCHD_FORMAT, "SCHD", job.id, server.type->name, server.id) + 1;
 	char schd[len];
-	snprintf(schd, len, SCHD_FORMAT,
-			"SCHD",
-			job->id,
-			server->type->name,
-			server->id);
+	snprintf(schd, len, SCHD_FORMAT, "SCHD", job.id, server.type->name, server.id);
 	return client_msg_resp(client, schd, "OK");
 }
 
