@@ -10,7 +10,7 @@ CXXFLAGS = -std=gnu++17
 .PHONY: all
 all: $(BINARY)
 
-$(BINARY): algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o -ltinyxml
+$(BINARY): main.o algorithms.o job_info.o resource_info.o socket_client.o system_config.o -ltinyxml
 	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $@ $^
 
 main.o: main.c
