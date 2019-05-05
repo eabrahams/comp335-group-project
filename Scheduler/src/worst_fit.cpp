@@ -1,6 +1,9 @@
 #include "worst_fit.h"
 
 #include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <memory>
 #include <limits>
 
 #include "system_config.h"
@@ -10,7 +13,26 @@ constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 100000; // TODO: adjust this
 
 void worst_fit(socket_client *client) noexcept(true) {
 	system_config *config = parse_config("system.xml");
-
+	while(true) {
+		client_send(client, "REDY");
+		char *response = client_receive(client);
+		job_info job;
+		if(!strncmp(response, "NONE", 4)) {
+			free(response);
+			break;
+		} else {
+			job = job_from_string(response);
+			free(response);
+		}
+		//TODO: look at what happens when the server isn't available (ie: all are taken)
+		server_info *server = find_server(config, job);
+		char *schedule;
+		asprintf(&schedule, "SCHD %i %s %i", job.id, server->type->name, server->id);
+		if(!client_msg_resp(client, schedule, "OK")) {
+			std::cerr << "Scheduler: worst fit: could not schedule job for " << job.id << "\n";
+		}
+		free(schedule);
+	}
 	client_send(client, "QUIT");
 	free_config(config);
 };
