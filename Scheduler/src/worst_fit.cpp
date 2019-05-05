@@ -58,11 +58,14 @@ void worst_fit(socket_client *client) noexcept(true) {
 			free(response);
 		}
 		//TODO: look at what happens when the server isn't available (ie: all are taken)
+		//TODO: schedule more jobs when jobs are finished, maybe add loop to keep querying server to update server states
 		server_info *server = find_server(config, job);
 		char *schedule;
 		asprintf(&schedule, "SCHD %i %s %i", job.id, server->type->name, server->id);
 		if(!client_msg_resp(client, schedule, "OK")) {
 			std::cerr << "Scheduler: worst fit: could not schedule job for " << job.id << "\n";
+		} else {
+			//TODO: update server with new information, since it will have less resources now and is running a new job
 		}
 		free(schedule);
 	}
