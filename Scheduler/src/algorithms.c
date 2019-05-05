@@ -9,12 +9,13 @@
 #include "system_config.h"
 #include "job_info.h"
 #include "resource_info.h"
+#include "stringhelper.h"
 
-/* calculate the difference between two numbers */
-#define difference(x,y) ((((x) >= (y)) ? (x) : (y)) - (((x) <= (y)) ? (x) : (y)))
 #define SCHD_FORMAT "%s %u %s %d"
+#define JOB_REGEX "JOBN ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)"
 
 void all_to_largest(socket_client *client) {
+	regex_info *job_regex = regex_init(JOB_REGEX);
 	system_config *config = parse_config("system.xml");
 	unsigned int i;
 	unsigned int largest_index = 0;
@@ -35,21 +36,16 @@ void all_to_largest(socket_client *client) {
 		if (strncmp(resp, "NONE", 4) == 0)
 			break;
 
-		job_info j = job_from_string(resp);
+		job_info j = strtojob(resp, job_regex);
 		free(resp); // we don't need the response string anymore
 
-		/* snprintf returns the number of characters it wants to write, so we
-		 * call it with null and size 0 to get that number, and then add 1
-		 * because snprintf writes a null character to the end of the string. */
-		size_t len = snprintf(NULL, 0, "%s %d %s %d", "SCHD", j.id, name, 0) + 1;
-		char schd_str[len];
-		snprintf(schd_str, len, "%s %d %s %d", "SCHD", j.id, name, 0);
-
-		bool success = client_msg_resp(client, schd_str, "OK");
+		char *schd = create_schd_str(j.id, name, 0);
+		bool success = client_msg_resp(client, schd, "OK");
 		if (!success) {
-			fprintf(stderr, "%s%d%s%s\n", "Unable to schedule job ", j.id, " with command: ", schd_str);
+			fprintf(stderr, "%s%u%s%s\n", "Unable to schedule job ", j.id, " with command: ", schd);
 			exit(1);
 		}
+		free(schd);
 	}
 
 	client_send(client, "QUIT");
@@ -58,6 +54,7 @@ void all_to_largest(socket_client *client) {
 }
 
 void best_first(socket_client *client) {
+	regex_info *job_regex = regex_init(JOB_REGEX);
 	system_config *config = parse_config("system.xml");
 	while (true) {
 		client_send(client, "REDY");
@@ -65,7 +62,7 @@ void best_first(socket_client *client) {
 		if (strncmp(resp, "NONE", 4) == 0)
 			break;
 
-		job_info job = job_from_string(resp);
+		job_info job = strtojob(resp, job_regex);
 		free(resp);
 
 		best_fit bf = { INT_MAX, UINT_MAX, 0, false };
@@ -87,7 +84,9 @@ void best_first(socket_client *client) {
 
 		bool success = false;
 		if (bf.found) {
-			success = schedule_job(client, job, config->servers[bf.index]);
+			char *schd = create_schd_str(job.id, config->servers[bf.index].type->name, config->servers[bf.index].id);
+			success = client_msg_resp(client, schd, "OK");
+			free(schd);
 		} else {
 			fprintf(stderr, "best not found for job %d\n", job.id);
 		}
@@ -97,13 +96,5 @@ void best_first(socket_client *client) {
 
 	client_send(client, "QUIT");
 	free_config(config);
-}
-
-bool schedule_job(socket_client *client, job_info job, server_info server) {
-	size_t len;
-	len = snprintf(NULL, 0, SCHD_FORMAT, "SCHD", job.id, server.type->name, server.id) + 1;
-	char schd[len];
-	snprintf(schd, len, SCHD_FORMAT, "SCHD", job.id, server.type->name, server.id);
-	return client_msg_resp(client, schd, "OK");
 }
 

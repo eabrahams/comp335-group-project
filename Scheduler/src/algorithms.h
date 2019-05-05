@@ -1,6 +1,11 @@
 #ifndef algorithms_h_
 #define algorithms_h_
 
+#ifndef PCRE2_CODE_UNIT_WIDTH
+#define PCRE2_CODE_UNIT_WIDTH 8
+#endif
+#include <pcre2.h>
+
 #include "socket_client.h"
 #include "system_config.h"
 #include "job_info.h"

@@ -5,6 +5,7 @@
 
 #include "socket_client.h"
 #include "algorithms.h"
+#include "stringhelper.h"
 
 typedef enum { ALL_TO_LARGEST, FIRST_FIT, BEST_FIRST, WORST_FIT } algorithm;
 

@@ -23,8 +23,6 @@ typedef struct job_info {
 #endif
 } job_info;
 
-job_info job_from_string(const char *jobstr) noexcept;
-
 // whether a job can run on given resources
 bool job_can_run(const job_info *job, const resource_info resc) noexcept;
 
