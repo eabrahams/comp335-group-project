@@ -92,7 +92,7 @@ inline namespace {
 }
 
 void server_type::release() noexcept {
-	free(const_cast<char*>(name));
+	free(name);
 }
 
 void server_group::release() noexcept {
@@ -103,6 +103,7 @@ void system_config::release() noexcept {
 	for(auto i = 0; i < num_types; ++i) {
 		const_cast<server_type*>(types)[i].release();
 	}
+	free(const_cast<server_type*>(types));
 	free(servers);
 }
 
