@@ -53,6 +53,47 @@ void all_to_largest(socket_client *client) {
 	free_config(config);
 }
 
+server_info *best_server(server_group *avail_servers, job_info job) {
+	server_info *best, *other;
+	size_t i;
+	int best_fitness = INT_MAX;
+	for (i = 0; i < avail_servers->num_servers; i++) {
+		server_info *server = avail_servers->servers[i];
+		int fitness = INT_MAX;
+		if (!best) {
+			if (job_can_run(&job, server->avail_resc)) {
+				/* If this server is able to run the job, then it is the first
+				 * we have found which is capable of doing so. */
+				best_fitness = job_fitness(&job, server->avail_resc);
+				best = server;
+				continue;
+			} else if (job_can_run(&job, server->type->max_resc)) {
+				fitness = job_fitness(&job, server->type->max_resc);
+				if (fitness < best_fitness) {
+					best_fitness = fitness;
+					other = server;
+				}
+				else if (fitness == best_fitness && server->avail_time < other->avail_time) {
+					best_fitness = fitness;
+					other = server;
+				}
+			}
+		} else if (job_can_run(&job, server->avail_resc)) {
+			fitness = job_fitness(&job, server->avail_resc);
+			if (fitness < best_fitness) {
+				best_fitness = fitness;
+				best = server;
+			} else if (fitness == best_fitness && server->avail_time < other->avail_time) {
+				best_fitness = fitness;
+				best = server;
+			}
+		}
+	}
+
+	return (best) ? best : other;
+}
+//if (fitness < bf.value || (fitness == bf.value && config->servers[i].avail_time < bf.min_avail)) {
+
 void best_first(socket_client *client) {
 	regex_info *job_regex = regex_init(JOB_REGEX);
 	system_config *config = parse_config("system.xml");
@@ -65,7 +106,32 @@ void best_first(socket_client *client) {
 		job_info job = strtojob(resp, job_regex);
 		free(resp);
 
-		best_fit bf = { INT_MAX, UINT_MAX, 0, false };
+		if (!update_config(config, client)) {
+			fprintf(stderr, "unable to update server information for job %d\n", job.id);
+			break;
+		}
+
+		/*
+		for (size_t i = 0; i < config->num_types; i++) {
+			if (!update_servers_by_type(config, client, &config->types[i])) {
+				fprintf(stderr, "unable to update server '%s' for job %d\n", config->types[i].name, job.id);
+				goto ALGORITHM_END;
+			}
+		}
+		*/
+
+		//best_fit bf = { INT_MAX, UINT_MAX, 0, false };
+		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+		server_info *best = best_server(avail_servers, job);
+		if (!best) {
+			fprintf(stderr, "best not found for job %d\n", job.id);
+			break;
+		}
+		char *schd = create_schd_str(job.id, best->type->name, best->id);
+		bool success = client_msg_resp(client, schd, "OK");
+		if (!success)
+			break;
+		/*
 		unsigned int i;
 		for (i = 0; i < config->num_servers; i++) {
 			resource_info server_resc = config->servers[i].avail_resc;
@@ -92,7 +158,9 @@ void best_first(socket_client *client) {
 		}
 		if (!success)
 			break;
+		*/
 	}
+ALGORITHM_END:
 
 	client_send(client, "QUIT");
 	free_config(config);
