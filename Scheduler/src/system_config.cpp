@@ -1,8 +1,8 @@
 #include "system_config.h"
-static_assert(std::is_pod_v<server_type>, "server_type MUST be POD to be C-safe!");
-static_assert(std::is_pod_v<server_info>, "server_info MUST be POD to be C-safe!");
-static_assert(std::is_pod_v<server_group>, "server_group MUST be POD to be C-safe!");
-static_assert(std::is_pod_v<system_config>, "system_config MUST be POD to be C-safe!");
+ASSERT_IS_POD(server_type);
+ASSERT_IS_POD(server_info);
+ASSERT_IS_POD(server_group);
+ASSERT_IS_POD(system_config);
 
 #include <tinyxml.h>
 #include <iostream>
