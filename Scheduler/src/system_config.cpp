@@ -78,7 +78,7 @@ inline namespace {
 			resource_info resc;
 			stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
 			auto *type = type_by_name(config, name.c_str());
-			server_info *server = start_of_type(config, type) + id;
+			server_info *server = &start_of_type(config, type)[id];
 			// don't need to check the time, it will auto-increment and also never change on its own
 			server->update(static_cast<server_state>(state), time, resc);
 			vec.push_back(server);
@@ -161,8 +161,8 @@ system_config *parse_config(const char *path) noexcept {
 
 	// use a vector for this, again to avoid over-alloc or realloc
 	auto servers = std::vector<server_info>();
-	for(auto i = 0; i < config->num_types; ++i) {
-		auto *type = config->types + i;
+	for(auto t = 0; t < config->num_types; ++t) {
+		auto *type = &config->types[t];
 		for(auto j = 0; j < type->limit; ++j) {
 			servers.push_back(server_info{ type, j, server_state::SS_INACTIVE, 0, type->max_resc });
 		}

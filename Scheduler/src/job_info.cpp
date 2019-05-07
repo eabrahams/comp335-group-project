@@ -6,6 +6,7 @@ ASSERT_IS_POD(job_info);
 #include <cstring>
 #include <cstdlib>
 #include <stdexcept>
+#include <limits>
 
 /* create job struct from string
  * format of string is:
@@ -34,8 +35,10 @@ bool job_info::can_run(const resource_info &resc) const noexcept {
 }
 
 int job_info::fitness(const resource_info &resc) const {
-	if(can_run(resc)) return static_cast<int>(resc.cores) - static_cast<int>(req_resc.cores);
-	else throw std::invalid_argument("Job must be able to run on resources to calculate a fitness value");
+	return static_cast<int>(resc.cores) - static_cast<int>(req_resc.cores);
+	// worst_fit algorithm actually requires fitness for non-runnable jobs
+	//if(can_run(resc)) return static_cast<int>(resc.cores) - static_cast<int>(req_resc.cores);
+	//else throw std::invalid_argument("Job must be able to run on resources to calculate a fitness value");
 }
 
 bool job_can_run(const job_info *job, const resource_info resc) noexcept {
@@ -44,9 +47,10 @@ bool job_can_run(const job_info *job, const resource_info resc) noexcept {
 };
 
 int job_fitness(const job_info *job, const resource_info resc) noexcept {
+	// worst_fit algorithm actually requires fitness for non-runnable jobs
 	try {
 		return job->fitness(resc);
 	} catch(...) {
-		return -1;
+		return std::numeric_limits<int>::min();
 	}
 };
