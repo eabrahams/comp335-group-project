@@ -160,7 +160,6 @@ void best_first(socket_client *client) {
 			break;
 		*/
 	}
-ALGORITHM_END:
 
 	client_send(client, "QUIT");
 	free_config(config);
