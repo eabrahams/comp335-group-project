@@ -11,35 +11,47 @@
 #include "system_config.h"
 #include "job_info.h"
 
-constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 1000; // TODO: adjust this to something sensible
+constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 10000; // TODO: adjust this to something sensible
 
-server_info *find_server(const std::vector<server_info*> &servers, const job_info &job) {
-	int worst_fit, alt_fit, ini_fit;
-	server_info *worst_server, *alt_server, *ini_server;
-	worst_fit = alt_fit = ini_fit = std::numeric_limits<int>::min();
-	for(auto server : servers) {
-		if(job.can_run(server->avail_resc)) {
-			int fitness = job.fitness(server->avail_resc);
-			if(fitness > worst_fit && server->state == server_state::SS_IDLE) {
-				worst_fit = fitness;
-				worst_server = server;
-			} else if(fitness > alt_fit && server->avail_time <= WORST_FIT_AVAIL_TIME_THRESHOLD) {
-				alt_fit = fitness;
-				alt_server = server;
-			}
-		}
-		if(job.can_run(server->type->max_resc)) {
-			int fitness = job.fitness(server->type->max_resc);
-			if(fitness > ini_fit && server->state == server_state::SS_IDLE) {
-				ini_fit = fitness;
-				ini_server = server;
-			}
+server_info *worst_server(const system_config* config, const std::vector<server_info*> &candidates, const job_info &job) {
+	int worst_fit, other_fit, type_fit;
+	server_info *worst_server, *other_server, *type_server;
+	unsigned other_avail_time, type_avail_time;
+	worst_fit = other_fit = type_fit = std::numeric_limits<int>::min();
+	other_avail_time = type_avail_time = WORST_FIT_AVAIL_TIME_THRESHOLD;
+
+	for(auto server : candidates) {
+		int fitness = job.fitness(server->avail_resc);
+		if(fitness > worst_fit && server->state == server_state::SS_IDLE) {
+			worst_fit = fitness;
+			worst_server = server;
+		} else if(fitness >= other_fit && server->avail_time <= other_avail_time) {
+			other_fit = fitness;
+			other_server = server;
+			other_avail_time = server->avail_time;
 		}
 	}
 
 	if(worst_fit > 0) return worst_server;
-	else if(alt_fit > 0) return alt_server;
-	else return ini_server;
+	else if(other_fit > 0) return other_server;
+
+	for(auto t = 0; t < config->num_types; ++t) {
+		auto type = &config->types[t];
+		if(!job.can_run(type->max_resc)) continue;
+		server_info *server_offset = start_of_type(config, type);
+		for(auto s = 0; s < type->limit; ++s) {
+			auto server = &server_offset[s];
+			if(server->state == server_state::SS_UNAVAILABLE) continue;
+			int fitness = job.fitness(server->avail_resc);
+			if(fitness >= type_fit && server->avail_time <= type_avail_time) {
+				type_fit = fitness;
+				type_server = server;
+				type_avail_time = server->avail_time;
+			}
+		}
+	}
+	
+	return type_server;
 }
 
 void worst_fit(socket_client *client) noexcept {
@@ -53,7 +65,7 @@ void worst_fit(socket_client *client) noexcept {
 		//TODO: schedule more jobs when jobs are finished, maybe add loop to keep querying server to update server states
 		try {
 			std::vector<server_info*> candidates = config->update(client, job.req_resc);
-			server_info *server = find_server(candidates, job);
+			server_info *server = worst_server(config, candidates, job);
 
 			std::ostringstream schedule("SCHD ");
 			schedule << job.id << " " << server->type->name << " " << server->id;
