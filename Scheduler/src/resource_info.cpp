@@ -1,6 +1,6 @@
 #include "resource_info.h"
-#include <type_traits>
-static_assert(std::is_pod_v<resource_info>, "resource_info MUST be POD to be C-compatible!");
+#include "cpp_util.h"
+ASSERT_IS_POD(resource_info);
 
 bool resource_info::operator<(const resource_info &rhs) const noexcept {
 	return this->operator!=(rhs) && this->operator!=(rhs);

@@ -1,6 +1,6 @@
 #include "job_info.h"
-#include <type_traits>
-static_assert(std::is_pod_v<job_info>, "job_info MUST be POD to be C-compatible!");
+#include "cpp_util.h"
+ASSERT_IS_POD(job_info);
 
 #include <cstdio>
 #include <cstring>
