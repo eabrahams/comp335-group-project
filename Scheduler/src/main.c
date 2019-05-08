@@ -3,27 +3,9 @@
 #include <string.h>
 #include "socket_client.h"
 #include "system_config.h"
-#include "job_info.h"
-#include "all_to_largest.h"
+#include "algorithms.h"
 
 void usage(char *name);
-
-server_info *first_fit(system_config *config, server_group *group, job_info job);
-server_info *best_fit(system_config *config, server_group *group, job_info job);
-server_info *worst_fit(system_config *config, server_group *group, job_info job);
-
-server_info *first_fit(system_config *config, server_group *group, job_info job) {
-	puts("not implemented here");
-	return NULL;
-}
-server_info *best_fit(system_config *config, server_group *group, job_info job) {
-	puts("not implemented here");
-	return NULL;
-}
-server_info *worst_fit(system_config *config, server_group *group, job_info job) {
-	puts("not implemented here");
-	return NULL;
-}
 
 int main(int argc, char **argv) {
 	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
@@ -53,9 +35,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	client_run_algorithm(client, algorithm);
+	run_algorithm(client, algorithm);
 
-	// update_server(server_of_type(config, type) + id, state, time, cores, memory, disk);
 	return 0;
 }
 
@@ -63,3 +44,4 @@ void usage(char *name) {
 	printf("%s%s\n", name, " [-a ALGORITHM]");
 	exit(1);
 }
+
