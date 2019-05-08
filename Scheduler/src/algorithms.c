@@ -30,6 +30,8 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 
 		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
 		server_info *choice = algorithm(config, avail_servers, job);
+		free_group(avail_servers);
+
 		if (!choice) {
 			fprintf(stderr, "unable to find server for job %d\n", job.id);
 			break;
