@@ -70,23 +70,21 @@ inline namespace {
 	std::vector<server_info*> process_update(system_config *config, socket_client *client) {
 		std::vector<server_info*> vec;
 		client_send(client, "OK");
-		char *response = client_receive(client);
-		while(strcmp(response, ".")) {
+		std::string response = strcpy_and_free(client_receive(client));
+		while(response != ".") {
 			std::istringstream stream(response);
 			std::string name;
 			int id, state, time;
 			resource_info resc;
 			stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
-			auto *type = type_by_name(config, name.c_str());
-			server_info *server = &start_of_type(config, type)[id];
+			auto *type = config->type_by_name(name.c_str());
+			server_info *server = &config->start_of_type(type)[id];
 			// don't need to check the time, it will auto-increment and also never change on its own
 			server->update(static_cast<server_state>(state), time, resc);
 			vec.push_back(server);
-			free(response);
 			client_send(client, "OK");
-			response = client_receive(client);
+			response = strcpy_and_free(client_receive(client));
 		}
-		free(response);
 		return vec;
 	};
 }
@@ -183,19 +181,34 @@ void free_group(server_group *group) noexcept {
 	free(group);
 }
 
-const server_type *type_by_name(const system_config *config, const char* name) noexcept {
-	for(auto i = 0; i < config->num_types; ++i) {
-		if(!strcmp(config->types[i].name, name)) return &config->types[i];
+const server_type *system_config::type_by_name(const char *name) const {
+	for(auto t = 0; t < num_types; ++t) {
+		if(!strcmp(types[t].name, name)) return &types[t];
 	}
-	return nullptr;
+	throw std::invalid_argument("No type exists with requested name!");
+}
+
+const server_type *type_by_name(const system_config *config, const char* name) noexcept {
+	try {
+		return config->type_by_name(name);
+	} catch(...) {
+		return nullptr;
+	}
+}
+
+server_info *system_config::start_of_type(const server_type *type) const {
+	for(auto s = 0; s < num_servers; ++s) {
+		if(servers[s].type == type) return &servers[s];
+	}
+	throw std::invalid_argument("No servers exist with requested type!");
 };
 
-
 server_info *start_of_type(const system_config *config, const server_type *type) noexcept {
-	for(auto i = 0; i < config->num_servers; ++i) {
-		if(config->servers[i].type == type) return &config->servers[i];
+	try {
+		return config->start_of_type(type);
+	} catch(...) {
+		return nullptr;
 	}
-	return nullptr;
 }
 
 bool update_config(system_config *config, socket_client *client) noexcept {
