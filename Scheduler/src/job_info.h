@@ -16,7 +16,6 @@ typedef struct job_info {
 	unsigned id;
 	unsigned est_runtime;
 	resource_info req_resc;
-	bool complete;
 #ifdef __cplusplus
 	bool can_run(const resource_info &resc) const noexcept;
 	int fitness(const resource_info &resc) const;
