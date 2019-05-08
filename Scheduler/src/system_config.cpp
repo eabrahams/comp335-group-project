@@ -13,6 +13,7 @@ ASSERT_IS_POD(system_config);
 #include <sstream>
 
 inline namespace {
+
 	/*
 	check if an element has an attribute with a given name,
 	allocating and copying the data to dest_ptr and returning true if it does,
@@ -56,9 +57,7 @@ inline namespace {
 		return false;
 	}
 
-	/*
-	verify that the name of an element is a given value
-	*/
+	// verify that the name of an element is a given value
 	bool elem_name_is(const TiXmlElement *elem, const char *name) noexcept {
 		if(strcmp(name, elem->Value())) {
 			std::cerr << "Parser: bad element type: expected '" << name << "', but got '" << elem->Value() << "'\n";
@@ -66,27 +65,16 @@ inline namespace {
 		} else return true;
 	}
 	
-	// update a system_config, returning all the altered servers
+	// helper to call update_from_string on a system_config until a socket_client runs out of updates to send
 	std::vector<server_info*> process_update(system_config *config, socket_client *client) {
 		std::vector<server_info*> vec;
 		client_send(client, "OK");
-		char *response = client_receive(client);
-		while(strcmp(response, ".")) {
-			std::istringstream stream(response);
-			std::string name;
-			int id, state, time;
-			resource_info resc;
-			stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
-			auto *type = type_by_name(config, name.c_str());
-			server_info *server = &start_of_type(config, type)[id];
-			// don't need to check the time, it will auto-increment and also never change on its own
-			server->update(static_cast<server_state>(state), time, resc);
-			vec.push_back(server);
-			free(response);
+		std::string response = strcpy_and_free(client_receive(client));
+		while(response != ".") {
+			vec.push_back(config->update_from_string(response));
 			client_send(client, "OK");
-			response = client_receive(client);
+			response = strcpy_and_free(client_receive(client));
 		}
-		free(response);
 		return vec;
 	};
 }
@@ -125,6 +113,19 @@ std::vector<server_info *> system_config::update(socket_client *client, const re
 	if(!client_msg_resp(client, request.str().c_str(), "DATA")) throw std::runtime_error("Server did not respond as expected to RESC command!");
 	else return process_update(this, client);
 }
+
+server_info *system_config::update_from_string(const std::string &str) {
+	std::istringstream stream(str);
+	std::string name;
+	int id, state, time;
+	resource_info resc;
+	// use standard istream parsing to just split values at spaces, works great for our use-case
+	stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
+	auto *type = type_by_name(name.c_str());
+	server_info *server = &start_of_type(type)[id];
+	server->update(static_cast<server_state>(state), time, resc);
+	return server;
+};
 
 system_config *parse_config(const char *path) noexcept {
 	TiXmlDocument doc;
@@ -168,6 +169,7 @@ system_config *parse_config(const char *path) noexcept {
 		}
 	}
 
+	// we own these to begin with, so no problem here
 	config->num_servers = memcpy_from_vector(config->servers, servers);
 
 	return config;
@@ -183,19 +185,34 @@ void free_group(server_group *group) noexcept {
 	free(group);
 }
 
-const server_type *type_by_name(const system_config *config, const char* name) noexcept {
-	for(auto i = 0; i < config->num_types; ++i) {
-		if(!strcmp(config->types[i].name, name)) return &config->types[i];
+const server_type *system_config::type_by_name(const char *name) const {
+	for(auto t = 0; t < num_types; ++t) {
+		if(!strcmp(types[t].name, name)) return &types[t];
 	}
-	return nullptr;
+	throw std::invalid_argument("No type exists with requested name!");
+}
+
+const server_type *type_by_name(const system_config *config, const char* name) noexcept {
+	try {
+		return config->type_by_name(name);
+	} catch(...) {
+		return nullptr;
+	}
+}
+
+server_info *system_config::start_of_type(const server_type *type) const {
+	for(auto s = 0; s < num_servers; ++s) {
+		if(servers[s].type == type) return &servers[s];
+	}
+	throw std::invalid_argument("No servers exist with requested type!");
 };
 
-
 server_info *start_of_type(const system_config *config, const server_type *type) noexcept {
-	for(auto i = 0; i < config->num_servers; ++i) {
-		if(config->servers[i].type == type) return &config->servers[i];
+	try {
+		return config->start_of_type(type);
+	} catch(...) {
+		return nullptr;
 	}
-	return nullptr;
 }
 
 bool update_config(system_config *config, socket_client *client) noexcept {
