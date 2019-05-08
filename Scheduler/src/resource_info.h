@@ -15,6 +15,7 @@ typedef struct resource_info {
 	unsigned disk; // disk in MB
 } resource_info;
 
+// utilities for resource capacity comparison logic
 #ifdef __cplusplus
 bool operator<(const resource_info &lhs, const resource_info &rhs) noexcept;
 bool operator<=(const resource_info &lhs, const resource_info &rhs) noexcept;

@@ -15,6 +15,7 @@
 // use this to ensure a type is C-safe
 #define ASSERT_IS_POD(TYPE) static_assert(std::is_pod< TYPE >::value, #TYPE " must be POD to be C-safe!")
 
+// utility function providing std::vector<thing> => thing* functionality
 template<typename T>
 typename std::enable_if<std::is_pod<T>::value, size_t>::type memcpy_from_vector(T *&dest, const std::vector<typename std::remove_const<T>::type> &vec) {
 	dest = static_cast<T*>(malloc(sizeof(T)*vec.size()));
@@ -22,6 +23,7 @@ typename std::enable_if<std::is_pod<T>::value, size_t>::type memcpy_from_vector(
 	return vec.size();
 }
 
+// assume ownership, instantiate a std::string, and free the memory used
 std::string strcpy_and_free(char *src) noexcept;
 
 #endif

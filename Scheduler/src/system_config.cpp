@@ -13,6 +13,7 @@ ASSERT_IS_POD(system_config);
 #include <sstream>
 
 inline namespace {
+
 	/*
 	check if an element has an attribute with a given name,
 	allocating and copying the data to dest_ptr and returning true if it does,
@@ -56,9 +57,7 @@ inline namespace {
 		return false;
 	}
 
-	/*
-	verify that the name of an element is a given value
-	*/
+	// verify that the name of an element is a given value
 	bool elem_name_is(const TiXmlElement *elem, const char *name) noexcept {
 		if(strcmp(name, elem->Value())) {
 			std::cerr << "Parser: bad element type: expected '" << name << "', but got '" << elem->Value() << "'\n";
@@ -66,7 +65,7 @@ inline namespace {
 		} else return true;
 	}
 	
-	// update a system_config, returning all the altered servers
+	// helper to call update_from_string on a system_config until a socket_client runs out of updates to send
 	std::vector<server_info*> process_update(system_config *config, socket_client *client) {
 		std::vector<server_info*> vec;
 		client_send(client, "OK");
@@ -120,10 +119,10 @@ server_info *system_config::update_from_string(const std::string &str) {
 	std::string name;
 	int id, state, time;
 	resource_info resc;
+	// use standard istream parsing to just split values at spaces, works great for our use-case
 	stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
 	auto *type = type_by_name(name.c_str());
 	server_info *server = &start_of_type(type)[id];
-	// don't need to check the time, it will auto-increment and also never change on its own
 	server->update(static_cast<server_state>(state), time, resc);
 	return server;
 };
@@ -170,6 +169,7 @@ system_config *parse_config(const char *path) noexcept {
 		}
 	}
 
+	// we own these to begin with, so no problem here
 	config->num_servers = memcpy_from_vector(config->servers, servers);
 
 	return config;

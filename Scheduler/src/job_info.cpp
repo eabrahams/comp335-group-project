@@ -34,7 +34,7 @@ bool job_info::can_run(const resource_info &resc) const noexcept {
 	return req_resc <= resc;
 }
 
-int job_info::fitness(const resource_info &resc) const {
+int job_info::fitness(const resource_info &resc) const noexcept {
 	return static_cast<int>(resc.cores) - static_cast<int>(req_resc.cores);
 	// worst_fit algorithm actually requires fitness for non-runnable jobs
 	//if(can_run(resc)) return static_cast<int>(resc.cores) - static_cast<int>(req_resc.cores);
