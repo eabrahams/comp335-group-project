@@ -72,16 +72,7 @@ inline namespace {
 		client_send(client, "OK");
 		std::string response = strcpy_and_free(client_receive(client));
 		while(response != ".") {
-			std::istringstream stream(response);
-			std::string name;
-			int id, state, time;
-			resource_info resc;
-			stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
-			auto *type = config->type_by_name(name.c_str());
-			server_info *server = &config->start_of_type(type)[id];
-			// don't need to check the time, it will auto-increment and also never change on its own
-			server->update(static_cast<server_state>(state), time, resc);
-			vec.push_back(server);
+			vec.push_back(config->update_from_string(response));
 			client_send(client, "OK");
 			response = strcpy_and_free(client_receive(client));
 		}
@@ -123,6 +114,19 @@ std::vector<server_info *> system_config::update(socket_client *client, const re
 	if(!client_msg_resp(client, request.str().c_str(), "DATA")) throw std::runtime_error("Server did not respond as expected!");
 	else return process_update(this, client);
 }
+
+server_info *system_config::update_from_string(const std::string &str) {
+	std::istringstream stream(str);
+	std::string name;
+	int id, state, time;
+	resource_info resc;
+	stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
+	auto *type = type_by_name(name.c_str());
+	server_info *server = &start_of_type(type)[id];
+	// don't need to check the time, it will auto-increment and also never change on its own
+	server->update(static_cast<server_state>(state), time, resc);
+	return server;
+};
 
 system_config *parse_config(const char *path) noexcept {
 	TiXmlDocument doc;

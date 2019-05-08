@@ -68,6 +68,8 @@ typedef struct system_config {
 	void update(socket_client *client, const server_type *type);
 	// handler for `RESC Avail ..`, returns the servers updated
 	std::vector<server_info*> update(socket_client *client, const resource_info &resc);
+	// format is "<type> <id> <state> <avail_time> <avail_cores> <avail_mem> <avail_disk>"
+	server_info *update_from_string(const std::string &str);
 	void release() noexcept;
 #endif
 } system_config;
