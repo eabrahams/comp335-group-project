@@ -22,9 +22,36 @@ namespace {
 	TEST(ResourceInfo, LessThan) {
 		EXPECT_LT(resc_zero, resc_ordered);
 		EXPECT_LT(resc_zero, resc_reverse);
-		EXPECT_FALSE(resc_ones < resc_ordered);
-		EXPECT_FALSE(resc_twos < resc_ordered);
-		EXPECT_FALSE(resc_reverse < resc_ordered);
+		EXPECT_LT(resc_zero, resc_ones);
+		EXPECT_LT(resc_zero, resc_twos);
+		EXPECT_LT(resc_ones, resc_twos);
+	}
+
+	TEST(ResourceInfo, GreaterThan) {
+		EXPECT_GT(resc_ordered, resc_zero);
+		EXPECT_GT(resc_reverse, resc_zero);
+		EXPECT_GT(resc_ones, resc_zero);
+		EXPECT_GT(resc_twos, resc_zero);
+		EXPECT_GT(resc_twos, resc_ones);
+	}
+
+	TEST(ResourceInfo, LessOrEqual) {
+		EXPECT_LE(resc_zero, resc_ordered);
+		EXPECT_LE(resc_zero, resc_reverse);
+		EXPECT_LE(resc_ordered, resc_twos);
+		EXPECT_LE(resc_reverse, resc_twos);
+	}
+	
+	TEST(ResourceInfo, GreaterOrEqual) {
+		EXPECT_GE(resc_ordered, resc_zero);
+		EXPECT_GE(resc_reverse, resc_zero);
+		EXPECT_GE(resc_twos, resc_ordered);
+		EXPECT_GE(resc_twos, resc_ordered);
+	}
+
+	TEST(ResourceInfo, ComparisonMisc) {
+		EXPECT_FALSE(resc_ordered < resc_reverse);
+		EXPECT_FALSE(resc_ordered > resc_reverse);
 	}
 
 }
