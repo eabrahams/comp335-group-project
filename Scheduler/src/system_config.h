@@ -63,6 +63,8 @@ struct system_config_s {
 	server_info *servers; // flat collection of servers, ordered by type then id
 	size_t num_servers; // number of servers
 #ifdef __cplusplus
+	const server_type *type_by_name(const char *name) const;
+	server_info *start_of_type(const server_type *type) const;
 	// handler for `RESC All`
 	void update(socket_client *client);
 	// handler for `RESC Type ..`
