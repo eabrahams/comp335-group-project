@@ -8,6 +8,9 @@
 #include <string.h>
 
 #include "socket_client.h"
+#include "system_config.h"
+#include "job_info.h"
+#include "stringhelper.h"
 
 #define LOCALHOST "127.0.0.1"
 #define DEFAULT_PORT 8096
@@ -15,6 +18,7 @@
 #define END "."
 #define VERBOSE
 #define BUF_SIZE 1024
+#define JOB_REGEX "JOBN ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)"
 
 bool client_msg_resp(socket_client *client, const char *msg, const char *expected_response);
 
@@ -80,5 +84,43 @@ bool client_msg_resp(socket_client *client, const char *msg, const char *expecte
 	free(response);
 
 	return result;
+}
+
+void client_run_algorithm(socket_client *client, server_info *(*algorithm)(system_config*,server_group*,job_info)) {
+	regex_info *job_regex = regex_init(JOB_REGEX);
+	system_config *config = parse_config("system.xml");
+	while (true) {
+		client_send(client, "REDY");
+		char *resp = client_receive(client);
+		if (strncmp(resp, "NONE", 4) == 0)
+			break;
+
+		job_info job = strtojob(resp, job_regex);
+		free(resp);
+
+		if (!update_config(config, client)) {
+			fprintf(stderr, "unable to update server information for job %d\n", job.id);
+			break;
+		}
+
+		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+		server_info *choice = algorithm(config, avail_servers, job);
+		if (!choice) {
+			fprintf(stderr, "best not found for job %d\n", job.id);
+			break;
+		}
+		char *schd = create_schd_str(job.id, choice->type->name, choice->id);
+		bool success = client_msg_resp(client, schd, "OK");
+		if (!success)
+			break;
+	}
+
+	client_send(client, "QUIT");
+	free_config(config);
+}
+
+void client_free(socket_client *client) {
+	free(client->socket);
+	free(client);
 }
 

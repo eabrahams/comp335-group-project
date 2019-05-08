@@ -12,6 +12,9 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
+typedef struct server_info_s server_info;
+typedef struct server_group_s server_group;
+typedef struct system_config_s system_config;
 #include "socket_client.h"
 
 typedef struct server_type {
@@ -33,7 +36,7 @@ typedef enum server_state {
 	SS_UNAVAILABLE // server is otherwise unavailable
 } server_state;
 
-typedef struct server_info {
+struct server_info_s {
 	const server_type *type; // the type of this server
 	int id; // the type-unique identifier of this server
 	server_state state; // the current state of this server
@@ -43,18 +46,18 @@ typedef struct server_info {
 	bool update(server_state state, int time, const resource_info &resc) noexcept;
 	void reset() noexcept;
 #endif
-} server_info;
+};
 
 // container for an arbitrary collection of servers
-typedef struct server_group {
+struct server_group_s {
 	server_info *const * servers; // flat collection, no order
 	size_t num_servers; // number of servers
 #ifdef __cplusplus
 	void release() noexcept;
 #endif
-} server_group;
+};
 
-typedef struct system_config {
+struct system_config_s {
 	const server_type *types; // collection of types, ordered as parsed from XML
 	size_t num_types; // number of types
 	server_info *servers; // flat collection of servers, ordered by type then id
@@ -68,7 +71,7 @@ typedef struct system_config {
 	std::vector<server_info*> update(socket_client *client, const resource_info &resc);
 	void release() noexcept;
 #endif
-} system_config;
+};
 
 /*
 parses an XML file located at `path`, either returning a pointer
