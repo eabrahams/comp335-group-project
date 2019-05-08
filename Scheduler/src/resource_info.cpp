@@ -3,7 +3,7 @@
 ASSERT_IS_POD(resource_info);
 
 bool resource_info::operator<(const resource_info &rhs) const noexcept {
-	return this->operator!=(rhs) && this->operator!=(rhs);
+	return this->operator!=(rhs) && this->operator<=(rhs);
 }
 
 bool resource_info::operator<=(const resource_info &rhs) const noexcept {
