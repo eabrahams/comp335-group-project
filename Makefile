@@ -1,6 +1,11 @@
-VPATH = Scheduler/src
+VPATH = Scheduler/src:Scheduler/tst
+
+#this is set to the default install location for the ubuntu package, change as required
+GTEST_DIR = /usr/src/gtest
 
 BINARY = c-client
+
+TEST = gtest-runner
 
 CC = clang
 CFLAGS = -std=gnu11
@@ -8,7 +13,7 @@ CXX = clang++
 CXXFLAGS = -std=gnu++17
 
 all: all_to_largest.o job_info.o main.o resource_info.o socket_client.o system_config.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8
-	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $(BINARY) $^
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(BINARY) $^
 
 main.o: main.c
 
@@ -26,9 +31,22 @@ stringhelper.o: stringhelper.c stringhelper.h
 
 cpp_util.o: cpp_util.cpp cpp_util.h
 
+test: gtest-all.o gtest_main.o job_info.test.o job_info.o resource_info.test.o resource_info.o -ltinyxml -lpcre2-8 -lpthread
+	$(CXX) $(CPPFLAGSE) $(CXXFLAGS) -o $(TEST) $^
+	./$(TEST)
+
+gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c $^
+
+gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c $^
+
+job_info.test.o: job_info.test.cpp
+
+resource_info.test.o: resource_info.test.cpp
+
 clean:
 	rm -f *.o
 
 clean-all:
-	rm -f *.o $(BINARY)
-
+	rm -f *.o $(BINARY) $(TEST)
