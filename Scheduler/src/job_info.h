@@ -5,7 +5,11 @@
 #include "resource_info.h"
 
 #ifdef __cplusplus
+#ifndef EXTERN_C
+#define EXTERN_C
+#define EXTERN_C_job_info_h_
 extern "C" {
+#endif
 #else
 #define noexcept
 #include <stdbool.h>
@@ -37,7 +41,11 @@ bool job_can_run(const job_info *job, const resource_info resc) noexcept;
 int job_fitness(const job_info *job, const resource_info resc) noexcept;
 
 #ifdef __cplusplus
+#ifdef EXTERN_C_job_info_h_
 }
+#undef EXTERN_C_job_info_h_
+#undef EXTERN_C
+#endif
 #else
 #undef noexcept
 #endif

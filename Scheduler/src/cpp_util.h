@@ -6,6 +6,10 @@
 #error "Do NOT include this file in C source!"
 #else
 
+#ifdef EXTERN_C
+}
+#endif
+
 #include <cstddef>
 #include <type_traits>
 #include <vector>
@@ -25,6 +29,10 @@ typename std::enable_if<std::is_pod<T>::value, size_t>::type memcpy_from_vector(
 
 // assume ownership, instantiate a std::string, and free the memory used
 std::string strcpy_and_free(char *src) noexcept;
+
+#ifdef EXTERN_C
+extern "C" {
+#endif
 
 #endif
 
