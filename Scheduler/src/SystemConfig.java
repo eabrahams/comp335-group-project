@@ -356,7 +356,8 @@ public final class SystemConfig {
         Map<ServerType, List<ServerInfo>> servers = new HashMap<>();
         for(ServerType type : serverTypes.values()) {
             List<ServerInfo> group = new ArrayList<>(type.limit);
-            for(int i = 0; i < type.limit; ++i) group.add(new ServerInfo(type, i));
+            for(int i = 0; i < type.limit; ++i) 
+				group.add(new ServerInfo(type, i));
             // make sure the id of a server matches the index in its list
             servers.put(type, Collections.unmodifiableList(group));
         }

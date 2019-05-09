@@ -1,99 +1,52 @@
-public class Job {
-	
-	private int submitTime;
-	private int jobId;
-	private int estimatedRuntime;
-	private int cores;
-	private int memory;
-	private int disk;
-	
-	private boolean complete = false;
-	
-	
-	//getter
-	
-	
-	
-	public int getSubmitTime(){
-		return submitTime;
-	}
-	
-	public int getJobId(){
-		return jobId;
-	}
-	
-	public int getEstimatedRuntime(){
-		return estimatedRuntime;
-	}
-	
-	public int getCores(){
-		return cores;
-	}
-	
-	public int getMemory(){
-		return memory;
-	}
-	
-	public int getDisk(){
-		return disk;
-	}
-	
-	public boolean getCompleted(){
-		return complete;
-	}
-	
-	//setter
+import java.util.ArrayList;
 
+public class Job{
+	int subTime;
+	int jobID;
+	int est;
+	int core;
+	int memory;
+	int dsk;
 	
-	public void setSubmitTime(int t){
-		this.submitTime = t;
-	}
+	boolean scheduled;
 	
-	public void setJobId(int jID){
-		this.jobId = jID;
+	public Job()
+	{
+		//initiate an obj with null value
 	}
-	
-	public void setEstimatedRuntime(int rt){
-		this.estimatedRuntime = rt;
-	}
-	
-	public void setCores(int c){
-		this.cores = c;
-	}
-	
-	public void setMemory(int m){
-		this.memory = m;
-	}
-	
-	public void setDisk(int d){
-		this.disk = d;
-	}
-	
-	public void setComplited(){
-		this.complete = true;
-	}
+    
+    public Job(String[] arr)
+    {
+    	if (arr.length != 7)
+    	{
+    		System.out.println("Job can not be added. Insufficient value received");
+    		System.out.println("--------------------------------------------------");
+    	}
 		
-	public Job(int submitTime, int jobId, int estimatedRuntime, int cores, int memory, int disk){
-		setSubmitTime(submitTime);
-		setJobId(jobId);
-		setEstimatedRuntime(estimatedRuntime);
-		setCores(cores);
-		setMemory(memory);
-		setDisk(disk);
-	}
-	
-	//to get data as an array
-	public int[] getData() {
+    	this.subTime = Integer.parseInt(arr[1]);
+    	this.jobID = Integer.parseInt(arr[2]);
+    	this.est = Integer.parseInt(arr[3]);
+    	this.core = Integer.parseInt(arr[4]);
+    	this.memory = Integer.parseInt(arr[5]);
+    	this.dsk = Integer.parseInt(arr[6]);
 		
-		int[] data = new int[7]; //{null, submitTime, jobId, estimatedRuntime, cores, memory, disk};
-		
-		data[1] = submitTime;
-		data[2] = jobId;
-		data[3] = estimatedRuntime;
-		data[4] = cores;
-		data[5] = memory;
-		data[6] = disk;
-		
-		return data;
-	}
+		//assigning scheduled to false as default
+    	this.scheduled = false;	
+    }
+    
+    public String getJobRESC()
+    {
+    	return this.core+" "+this.memory+" "+this.dsk;
+    }
+    
+	//changing scheduled to true as the job gets done
+    public void jobDone()
+    {
+        this.scheduled = true;
+    }
+    
+    public String toString()
+    {
+    	return "--> Current Job >> id : "+this.jobID+" core : "+this.core+" memory : "+this.memory+" disk : "+this.dsk;
+    }
 }
