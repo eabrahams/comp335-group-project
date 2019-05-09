@@ -68,9 +68,9 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 	puts("not yet implemented");
 	return NULL;
 }
-
+/*
 server_info *worst_fit(system_config *config, server_group *group, job_info job) {
 	puts("not yet implemented");
 	return NULL;
-}
+}*/
 

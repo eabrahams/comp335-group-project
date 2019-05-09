@@ -10,9 +10,9 @@ extern "C" {
 #endif
 
 // MUST go here so it gets wrapped exactly once by extern "C" {..}
-#include "socket_client.h"
+#include "algorithms.h"
 
-void worst_fit(socket_client *client) noexcept(true);
+//server_info *worst_fit(system_config* config, server_group *candidates, job_info job);
 
 #ifdef __cplusplus
 }

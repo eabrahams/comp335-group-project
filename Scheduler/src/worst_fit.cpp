@@ -1,4 +1,4 @@
-#include "worst_fit.h"
+//#include "worst_fit.h"
 #include "cpp_util.h"
 
 #include <cstdint>
@@ -13,14 +13,19 @@
 
 constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 10000; // TODO: adjust this to something sensible
 
-server_info *worst_server(const system_config* config, const std::vector<server_info*> &candidates, const job_info &job) {
+extern "C" {
+	server_info *worst_fit(system_config* config, server_group *candidates, job_info job);
+}
+
+server_info *worst_fit(system_config* config, server_group *candidates, job_info job) {
 	int worst_fit, other_fit, type_fit;
 	server_info *worst_server, *other_server, *type_server;
 	unsigned other_avail_time, type_avail_time;
 	worst_fit = other_fit = type_fit = std::numeric_limits<int>::min();
 	other_avail_time = type_avail_time = WORST_FIT_AVAIL_TIME_THRESHOLD;
 
-	for(auto server : candidates) {
+	for(auto s = 0; s < candidates->num_servers; ++s) {
+		auto *server = candidates->servers[s];
 		int fitness = job.fitness(server->avail_resc);
 		if(fitness > worst_fit && server->state == server_state::SS_IDLE) {
 			worst_fit = fitness;
@@ -53,36 +58,3 @@ server_info *worst_server(const system_config* config, const std::vector<server_
 	
 	return type_server;
 }
-
-void worst_fit(socket_client *client) noexcept {
-	system_config *config = parse_config("system.xml");
-	client_send(client, "REDY");
-	std::string response = strcpy_and_free(client_receive(client));
-	while(response != "NONE") {
-		job_info job = job_from_string(response.c_str());
-
-		//TODO: look at what happens when the server isn't available (ie: all are taken)
-		//TODO: schedule more jobs when jobs are finished, maybe add loop to keep querying server to update server states
-		try {
-			std::vector<server_info*> candidates = config->update(client, job.req_resc);
-			server_info *server = worst_server(config, candidates, job);
-
-			std::ostringstream schedule("SCHD ");
-			schedule << job.id << " " << server->type->name << " " << server->id;
-
-			if(!client_msg_resp(client, schedule.str().c_str(), "OK")) {
-				throw std::runtime_error("Server did not respond as expected to SCHD command!");
-			}
-		} catch(std::runtime_error err) {
-			// also handles errors from the candidate updating
-			std::cerr << err.what() << "\n";
-			std::cerr << "Scheduler: could not schedule job for " << job.id << ", caused by previous error\n";
-		}
-
-		client_send(client, "REDY");
-		response = strcpy_and_free(client_receive(client));
-	}
-	client_send(client, "QUIT");
-	free_config(config);
-};
-
