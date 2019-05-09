@@ -8,8 +8,6 @@
 void usage(char *name);
 
 int main(int argc, char **argv) {
-	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
-
 	void *algorithm = &all_to_largest;
 
 	int i;
@@ -34,6 +32,8 @@ int main(int argc, char **argv) {
 			usage(argv[0]);
 		}
 	}
+
+	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
 
 	run_algorithm(client, algorithm);
 
