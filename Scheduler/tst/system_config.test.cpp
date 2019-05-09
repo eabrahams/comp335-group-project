@@ -103,10 +103,12 @@ namespace {
 			auto *type = &config->types[0];
 			EXPECT_EQ(config->type_by_name(type->name), type) << "With name=" << type->name << std::endl;
 		}
+		free_config(config);
 	}
 
 	TEST(TypeByName, NoSuchType) {
 		system_config *config = parse_config(exampleConfigPath);
 		EXPECT_THROW(config->type_by_name("this should break"), std::invalid_argument);
+		free_config(config);
 	}
 }
