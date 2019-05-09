@@ -69,7 +69,7 @@ server_info *best_server(server_group *avail_servers, job_info job) {
 				continue;
 			} else if (job_can_run(&job, server->type->max_resc)) {
 				fitness = job_fitness(&job, server->type->max_resc);
-				if (fitness < best_fitness) {
+				if (!other || fitness < best_fitness) {
 					best_fitness = fitness;
 					other = server;
 				}
