@@ -97,9 +97,12 @@ namespace {
 	}
 
 	TEST(TypeByName, ExistingTypes) {
-		system_config *config = parse_config(exampleConfigPath);
+		system_config *config = parse_config(defaultConfigPath);
 		auto *type = &config->types[0];
-		EXPECT_EQ(config->type_by_name(type->name), type);
+		for(auto t = 0; t < config->num_types; ++t) {
+			auto *type = &config->types[0];
+			EXPECT_EQ(config->type_by_name(type->name), type) << "With name=" << type->name << std::endl;
+		}
 	}
 
 	TEST(TypeByName, NoSuchType) {
