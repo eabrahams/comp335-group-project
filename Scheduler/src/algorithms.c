@@ -78,16 +78,21 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 	size_t i;
 	for (i = 0; i < group->num_servers; i++) {
 		server_info *server = group->servers[i];
-		if (!best && job_can_run(&job, server->avail_resc)) {
-			current = &best;
-			best = server;
-			best_fitness = job_fitness(&job, server->avail_resc);
-			continue;
-		}
+		const resource_info *resc;
+		if (!best) {
+			if (job_can_run(&job, server->avail_resc)) {
+				current = &best;
+				best = server;
+				best_fitness = job_fitness(&job, server->avail_resc);
+				continue;
+			}
 
-		resource_info resc = (best) ? server->avail_resc : server->type->max_resc;
-		if (job_can_run(&job, resc)) {
-			int fitness = job_fitness(&job, resc);
+			resc = &server->type->max_resc;
+		} else {
+			resc = &server->avail_resc;
+		}
+		if (job_can_run(&job, *resc)) {
+			int fitness = job_fitness(&job, *resc);
 			if (!*current || fitness < best_fitness || (fitness == best_fitness && server->avail_time < (*current)->avail_time)) {
 				best_fitness = fitness;
 				*current = server;
@@ -95,7 +100,7 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		}
 	}
 
-	return (best) ? best : other;
+	return *current;
 }
 
 server_info *worst_fit(system_config *config, server_group *group, job_info job) {
