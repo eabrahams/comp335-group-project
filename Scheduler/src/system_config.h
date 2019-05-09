@@ -6,7 +6,11 @@
 
 #ifdef __cplusplus
 #include "cpp_util.h"
+#ifndef EXTERN_C
+#define EXTERN_C
+#define EXTERN_C_system_config_h_
 extern "C" {
+#endif
 #else
 #define noexcept
 #include <stdbool.h>
@@ -79,6 +83,7 @@ typedef struct system_config {
 parses an XML file located at `path`, either returning a pointer
 to a valid system_config on success, or returning nullptr and
 logging to stderr on failure.
+the caller is responsible for calling free_config on the result
 */
 system_config *parse_config(const char *path) noexcept;
 
@@ -101,6 +106,7 @@ bool update_config(system_config *config, socket_client *client) noexcept;
 bool update_servers_by_type(system_config *config, socket_client *client, const server_type *type) noexcept;
 
 // wrapper around system_config.update, returns a collection of servers on success and nullptr on failure
+// the caller is responsible for calling free_group on the result
 server_group *updated_servers_by_avail(system_config *config, socket_client *client, const resource_info resc) noexcept;
 
 // validates the new resources for the server, returning true and updating if they're valid; false otherwise
@@ -110,7 +116,11 @@ server_group *updated_servers_by_avail(system_config *config, socket_client *cli
 void reset_server(server_info *server) noexcept;
 
 #ifdef __cplusplus
+#ifdef EXTERN_C_system_config_h_
 }
+#undef EXTERN_C_system_config_h_
+#undef EXTERN_C
+#endif
 #else
 #undef noexcept
 #endif
