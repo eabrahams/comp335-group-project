@@ -55,37 +55,24 @@ void all_to_largest(socket_client *client) {
 
 server_info *best_server(server_group *avail_servers, job_info job) {
 	server_info *best, *other;
-	size_t i;
+	server_info **current = &other;
 	int best_fitness = INT_MAX;
+	size_t i;
 	for (i = 0; i < avail_servers->num_servers; i++) {
 		server_info *server = avail_servers->servers[i];
-		int fitness = INT_MAX;
-		if (!best) {
-			if (job_can_run(&job, server->avail_resc)) {
-				/* If this server is able to run the job, then it is the first
-				 * we have found which is capable of doing so. */
-				best_fitness = job_fitness(&job, server->avail_resc);
-				best = server;
-				continue;
-			} else if (job_can_run(&job, server->type->max_resc)) {
-				fitness = job_fitness(&job, server->type->max_resc);
-				if (!other || fitness < best_fitness) {
-					best_fitness = fitness;
-					other = server;
-				}
-				else if (fitness == best_fitness && server->avail_time < other->avail_time) {
-					best_fitness = fitness;
-					other = server;
-				}
-			}
-		} else if (job_can_run(&job, server->avail_resc)) {
-			fitness = job_fitness(&job, server->avail_resc);
-			if (fitness < best_fitness) {
+		if (!best && job_can_run(&job, server->avail_resc)) {
+			current = &best;
+			best = server;
+			best_fitness = job_fitness(&job, server->avail_resc);
+			continue;
+		}
+
+		resource_info resc = (best) ? server->avail_resc : server->type->max_resc;
+		if (job_can_run(&job, resc)) {
+			int fitness = job_fitness(&job, resc);
+			if (!*current || fitness < best_fitness || (fitness == best_fitness && server->avail_time < (*current)->avail_time)) {
 				best_fitness = fitness;
-				best = server;
-			} else if (fitness == best_fitness && server->avail_time < other->avail_time) {
-				best_fitness = fitness;
-				best = server;
+				*current = server;
 			}
 		}
 	}
