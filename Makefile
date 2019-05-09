@@ -1,6 +1,11 @@
-VPATH = Scheduler/src
+VPATH = Scheduler/src:Scheduler/tst
+
+#this is set to the default install location for the ubuntu package, change as required
+GTEST_DIR = /usr/src/gtest
 
 BINARY = ds-client
+
+TEST = gtest-runner
 
 CC = clang
 CFLAGS = -std=gnu11 -Wall -Wextra -pedantic
@@ -10,8 +15,8 @@ CXXFLAGS = -std=gnu++17
 .PHONY: all
 all: $(BINARY)
 
-$(BINARY): main.o algorithms.o job_info.o resource_info.o socket_client.o system_config.o stringhelper.o -ltinyxml -lpcre2-8
-	$(CXX) $(CXXFLAGS) -I Scheduler/src -o $@ $^
+$(BINARY): main.o algorithms.o socket_client.o system_config.o resource_info.o job_info.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
 
 main.o: main.c
 
@@ -27,9 +32,26 @@ algorithms.o: algorithms.c algorithms.h
 
 stringhelper.o: stringhelper.c stringhelper.h
 
+cpp_util.o: cpp_util.cpp cpp_util.h
+
+test: gtest-all.o gtest_main.o system_config.test.o job_info.test.o resource_info.test.o system_config.o job_info.o resource_info.o socket_client.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8 -lpthread
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(TEST) $^
+	./$(TEST)
+
+gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c $^
+
+gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c $^
+
+system_config.test.o: system_config.test.cpp
+
+job_info.test.o: job_info.test.cpp
+
+resource_info.test.o: resource_info.test.cpp
+
 clean:
 	rm -f *.o
 
 clean-all:
-	rm -f *.o $(BINARY)
-
+	rm -f *.o $(BINARY) $(TEST)

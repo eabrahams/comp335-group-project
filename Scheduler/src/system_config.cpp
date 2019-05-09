@@ -1,8 +1,8 @@
 #include "system_config.h"
-static_assert(std::is_pod_v<server_type>, "server_type MUST be POD to be C-safe!");
-static_assert(std::is_pod_v<server_info>, "server_info MUST be POD to be C-safe!");
-static_assert(std::is_pod_v<server_group>, "server_group MUST be POD to be C-safe!");
-static_assert(std::is_pod_v<system_config>, "system_config MUST be POD to be C-safe!");
+ASSERT_IS_POD(server_type);
+ASSERT_IS_POD(server_info);
+ASSERT_IS_POD(server_group);
+ASSERT_IS_POD(system_config);
 
 #include <tinyxml.h>
 #include <iostream>
@@ -13,6 +13,7 @@ static_assert(std::is_pod_v<system_config>, "system_config MUST be POD to be C-s
 #include <sstream>
 
 inline namespace {
+
 	/*
 	check if an element has an attribute with a given name,
 	allocating and copying the data to dest_ptr and returning true if it does,
@@ -56,9 +57,7 @@ inline namespace {
 		return false;
 	}
 
-	/*
-	verify that the name of an element is a given value
-	*/
+	// verify that the name of an element is a given value
 	bool elem_name_is(const TiXmlElement *elem, const char *name) noexcept {
 		if(strcmp(name, elem->Value())) {
 			std::cerr << "Parser: bad element type: expected '" << name << "', but got '" << elem->Value() << "'\n";
@@ -66,27 +65,16 @@ inline namespace {
 		} else return true;
 	}
 	
-	// update a system_config, returning all the altered servers
+	// helper to call update_from_string on a system_config until a socket_client runs out of updates to send
 	std::vector<server_info*> process_update(system_config *config, socket_client *client) {
 		std::vector<server_info*> vec;
 		client_send(client, "OK");
-		char *response = client_receive(client);
-		while(strcmp(response, ".")) {
-			std::istringstream stream(response);
-			std::string name;
-			int id, state, time;
-			resource_info resc;
-			stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
-			auto *type = type_by_name(config, name.c_str());
-			server_info *server = start_of_type(config, type) + id;
-			// don't need to check the time, it will auto-increment and also never change on its own
-			server->update(static_cast<server_state>(state), time, resc);
-			vec.push_back(server);
-			free(response);
+		std::string response = strcpy_and_free(client_receive(client));
+		while(response != ".") {
+			vec.push_back(config->update_from_string(response));
 			client_send(client, "OK");
-			response = client_receive(client);
+			response = strcpy_and_free(client_receive(client));
 		}
-		free(response);
 		return vec;
 	};
 }
@@ -126,6 +114,19 @@ std::vector<server_info *> system_config::update(socket_client *client, const re
 	else return process_update(this, client);
 }
 
+server_info *system_config::update_from_string(const std::string &str) {
+	std::istringstream stream(str);
+	std::string name;
+	int id, state, time;
+	resource_info resc;
+	// use standard istream parsing to just split values at spaces, works great for our use-case
+	stream >> name >> id >> state >> time >> resc.cores >> resc.memory >> resc.disk;
+	auto *type = type_by_name(name.c_str());
+	server_info *server = &start_of_type(type)[id];
+	server->update(static_cast<server_state>(state), time, resc);
+	return server;
+};
+
 system_config *parse_config(const char *path) noexcept {
 	TiXmlDocument doc;
 	if(!doc.LoadFile(path)) return nullptr;
@@ -161,13 +162,14 @@ system_config *parse_config(const char *path) noexcept {
 
 	// use a vector for this, again to avoid over-alloc or realloc
 	auto servers = std::vector<server_info>();
-	for(auto i = 0; i < config->num_types; ++i) {
-		auto *type = config->types + i;
+	for(auto t = 0; t < config->num_types; ++t) {
+		auto *type = &config->types[t];
 		for(auto j = 0; j < type->limit; ++j) {
 			servers.push_back(server_info{ type, j, server_state::SS_INACTIVE, 0, type->max_resc });
 		}
 	}
 
+	// we own these to begin with, so no problem here
 	config->num_servers = memcpy_from_vector(config->servers, servers);
 
 	return config;
@@ -183,19 +185,34 @@ void free_group(server_group *group) noexcept {
 	free(group);
 }
 
-const server_type *type_by_name(const system_config *config, const char* name) noexcept {
-	for(auto i = 0; i < config->num_types; ++i) {
-		if(!strcmp(config->types[i].name, name)) return &config->types[i];
+const server_type *system_config::type_by_name(const char *name) const {
+	for(auto t = 0; t < num_types; ++t) {
+		if(!strcmp(types[t].name, name)) return &types[t];
 	}
-	return nullptr;
+	throw std::invalid_argument("No type exists with requested name!");
+}
+
+const server_type *type_by_name(const system_config *config, const char* name) noexcept {
+	try {
+		return config->type_by_name(name);
+	} catch(...) {
+		return nullptr;
+	}
+}
+
+server_info *system_config::start_of_type(const server_type *type) const {
+	for(auto s = 0; s < num_servers; ++s) {
+		if(servers[s].type == type) return &servers[s];
+	}
+	throw std::invalid_argument("No servers exist with requested type!");
 };
 
-
 server_info *start_of_type(const system_config *config, const server_type *type) noexcept {
-	for(auto i = 0; i < config->num_servers; ++i) {
-		if(config->servers[i].type == type) return &config->servers[i];
+	try {
+		return config->start_of_type(type);
+	} catch(...) {
+		return nullptr;
 	}
-	return nullptr;
 }
 
 bool update_config(system_config *config, socket_client *client) noexcept {

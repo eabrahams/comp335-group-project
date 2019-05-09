@@ -43,18 +43,12 @@ socket_client *client_init(char *host, int port) {
 	return client;
 }
 
-void client_free(socket_client *client) {
-	free(client->socket);
-	free(client);
-}
-
-/* sends a null-terminated string to the server over
- * a socket */
+/* Send a null-terminated string to the server over a socket. */
 void client_send(socket_client *client, const char *msg) {
 	send(client->fd, msg, strlen(msg), 0);
 }
 
-/* returns a string that is sent by the server. */
+/* Returns a string that is sent by the server. */
 char *client_receive(socket_client *client) {
 	char *buffer = malloc(sizeof *buffer * BUF_SIZE);
 	int length = read(client->fd, buffer, BUF_SIZE - 1);
@@ -66,17 +60,27 @@ char *client_receive(socket_client *client) {
 }
 
 /* Sends a message and then checks if the response is the one expected.
- * If we know exactly what the response should be then use this. */
+ * If we know exactly what the response should be then use this.
+ * Because there is an issue where the client is receiving more data at
+ * the end of a string, this function only tests n number of characters,
+ * where n=strlen(expected_response). */
 bool client_msg_resp(socket_client *client, const char *msg, const char *expected_response) {
+	size_t len = strlen(expected_response);
 	bool result = true;
 	client_send(client, msg);
 	char *response = client_receive(client);
-	if (strcmp(response, expected_response) != 0) {
-		fprintf(stderr, "%s%s%s%s%s\n", "expected '", expected_response, "' but received '", response, "'");
+	if (strncmp(response, expected_response, len) != 0) {
+		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu", expected_response, len, response, strlen(response));
+		//fprintf(stderr, "%s%s%s%s%c\n", "expected \"", expected_response, "\" but received \"", response, '"');
 		result = false;
 	}
 	free(response);
 
 	return result;
+}
+
+void client_free(socket_client *client) {
+	free(client->socket);
+	free(client);
 }
 

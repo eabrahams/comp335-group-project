@@ -1,80 +1,47 @@
-#include <string.h>
 #include <stdlib.h>
-#include <argp.h>
-#include <stdbool.h>
-
+#include <stdio.h>
+#include <string.h>
 #include "socket_client.h"
+#include "system_config.h"
 #include "algorithms.h"
-#include "stringhelper.h"
 
-typedef enum { ALL_TO_LARGEST, FIRST_FIT, BEST_FIRST, WORST_FIT } algorithm;
-
-void usage(char *prog);
-algorithm get_algorithm(char *name);
+void usage(char *name);
 
 int main(int argc, char **argv) {
-	char *algstr;
-	int i;
-	for (i = 1; i < argc; i++) {
-		if (strlen(argv[i]) < 2 || argv[i][0] != '-')
-			usage(argv[0]);
+	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
 
-		switch(argv[i][1]) {
-			case 'a':
-				if (i + 1 >= argc)
+	server_info *(*algorithm)(system_config*,server_group*,job_info) = &all_to_largest;
+
+	int i;
+	for (i = 0; i < argc; i++) {
+		if (argv[i][0] == '-') {
+			switch(argv[i][1]) {
+				case 'a':
+					i++;
+					if (strcmp(argv[i], "ff") == 0)
+						algorithm = &first_fit;
+					else if (strcmp(argv[i], "bf") == 0)
+						algorithm = &best_fit;
+					else if (strcmp(argv[i], "wf") == 0)
+						algorithm = &worst_fit;
+					else
+						fprintf(stderr, "algorithm not implemented: %s\n", argv[i]);
+					break;
+				default:
 					usage(argv[0]);
-				algstr = argv[++i];
-				break;
-			case 'h':
-				usage(argv[0]);
-				break;
+			}
+		} else {
+			usage(argv[0]);
 		}
 	}
-	algorithm a = get_algorithm(algstr);
 
-	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
-	switch(a) {
-		case ALL_TO_LARGEST:
-			all_to_largest(client);
-			break;
-		case FIRST_FIT:
-			puts("not yet implemented");
-			break;
-		case BEST_FIRST:
-			best_first(client);
-			break;
-		case WORST_FIT:
-			puts("not yet implemented");
-			break;
-	}
+	run_algorithm(client, algorithm);
 
-	client_free(client);
-	// update_server(server_of_type(config, type) + id, state, time, cores, memory, disk);
 	return 0;
 }
 
-algorithm get_algorithm(char *name) {
-	algorithm a = ALL_TO_LARGEST;
-	// name must be ff, bf or wf so length must be 2 and second char must be f
-	if (name && strlen(name) == 2 && name[1] == 'f') {
-		switch(name[0]) {
-			case 'f':
-				a = FIRST_FIT;
-				break;
-			case 'b':
-				a = BEST_FIRST;
-				break;
-			case 'w':
-				a = WORST_FIT;
-				break;
-		}
-	}
-
-	return a;
-}
-
-void usage(char *prog) {
-	printf("%s%s\n", prog, " [-a ALGORITHM]");
+void usage(char *name) {
+	printf("%s%s\n", name, " [-a ALGORITHM]");
 	exit(1);
 }
 

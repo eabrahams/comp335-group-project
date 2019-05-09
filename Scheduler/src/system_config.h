@@ -6,7 +6,11 @@
 
 #ifdef __cplusplus
 #include "cpp_util.h"
+#ifndef EXTERN_C
+#define EXTERN_C
+#define EXTERN_C_system_config_h_
 extern "C" {
+#endif
 #else
 #define noexcept
 #include <stdbool.h>
@@ -60,12 +64,17 @@ typedef struct system_config {
 	server_info *servers; // flat collection of servers, ordered by type then id
 	size_t num_servers; // number of servers
 #ifdef __cplusplus
-	// handler for `RESC All`
+	const server_type *type_by_name(const char *name) const;
+	server_info *start_of_type(const server_type *type) const;
+	// handler for `RESC All`, throws if the server does something unexpected
 	void update(socket_client *client);
-	// handler for `RESC Type ..`
+	// handler for `RESC Type .., throws if the server does something unexpected`
 	void update(socket_client *client, const server_type *type);
-	// handler for `RESC Avail ..`, returns the servers updated
+	// handler for `RESC Avail ..`, throws if the server does something unexpected
+	// returns the servers updated by the RESC command
 	std::vector<server_info*> update(socket_client *client, const resource_info &resc);
+	// format is "<type> <id> <state> <avail_time> <avail_cores> <avail_mem> <avail_disk>"
+	server_info *update_from_string(const std::string &str);
 	void release() noexcept;
 #endif
 } system_config;
@@ -74,6 +83,7 @@ typedef struct system_config {
 parses an XML file located at `path`, either returning a pointer
 to a valid system_config on success, or returning nullptr and
 logging to stderr on failure.
+the caller is responsible for calling free_config on the result
 */
 system_config *parse_config(const char *path) noexcept;
 
@@ -89,10 +99,14 @@ const server_type *type_by_name(const system_config *config, const char* name) n
 // gets the first server of a given type, all other servers of that type follow it in the same memory region
 server_info *start_of_type(const system_config *config, const server_type *type) noexcept;
 
+// wrapper around system_config.update, returns true on success and false on failure
 bool update_config(system_config *config, socket_client *client) noexcept;
 
+// wrapper around system_config.update, returns true on success and false on failure
 bool update_servers_by_type(system_config *config, socket_client *client, const server_type *type) noexcept;
 
+// wrapper around system_config.update, returns a collection of servers on success and nullptr on failure
+// the caller is responsible for calling free_group on the result
 server_group *updated_servers_by_avail(system_config *config, socket_client *client, const resource_info resc) noexcept;
 
 // validates the new resources for the server, returning true and updating if they're valid; false otherwise
@@ -102,7 +116,11 @@ server_group *updated_servers_by_avail(system_config *config, socket_client *cli
 void reset_server(server_info *server) noexcept;
 
 #ifdef __cplusplus
+#ifdef EXTERN_C_system_config_h_
 }
+#undef EXTERN_C_system_config_h_
+#undef EXTERN_C
+#endif
 #else
 #undef noexcept
 #endif
