@@ -6,7 +6,7 @@ public class Job{
 	int est;
 	int core;
 	int memory;
-	int dsk;
+	int disk;
 	
 	boolean scheduled;
 	
@@ -28,7 +28,7 @@ public class Job{
     	this.est = Integer.parseInt(arr[3]);
     	this.core = Integer.parseInt(arr[4]);
     	this.memory = Integer.parseInt(arr[5]);
-    	this.dsk = Integer.parseInt(arr[6]);
+    	this.disk = Integer.parseInt(arr[6]);
 		
 		//assigning scheduled to false as default
     	this.scheduled = false;	
@@ -36,7 +36,7 @@ public class Job{
     
     public String getJobRESC()
     {
-    	return this.core+" "+this.memory+" "+this.dsk;
+    	return this.core + " " + this.memory + " " + this.disk;
     }
     
 	//changing scheduled to true as the job gets done
@@ -47,6 +47,6 @@ public class Job{
     
     public String toString()
     {
-    	return "--> Current Job >> id : "+this.jobID+" core : "+this.core+" memory : "+this.memory+" disk : "+this.dsk;
+    	return "--> Current Job >> id : " + this.jobID + " core : " + this.core + " memory : " + this.memory + " disk : " + this.disk;
     }
 }
