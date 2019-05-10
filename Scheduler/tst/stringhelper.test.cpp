@@ -7,24 +7,30 @@ extern "C" {
 
 namespace {
 
+	void regexFreeHelper(regex_info *&regex) {
+		pcre2_code_free(regex->re);
+		pcre2_match_data_free(regex->match_data);
+		free(regex);
+	}
+
 	TEST(RegexInit, JobRegex) {
 		regex_info *regex = regex_init(JOB_REGEX);
 		ASSERT_NE(regex, nullptr);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, InvalidJobPrefix) {
 		regex_info *regex = regex_init(JOB_REGEX);
 		EXPECT_DEATH(strtojob("this should break", regex), "Bad job string: .*");
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, ServerErrorResponse) {
 		regex_info *regex = regex_init(JOB_REGEX);
 		EXPECT_DEATH(strtojob("ERR", regex), "Bad job string: .*");
-		free(regex);
+		regexFreeHelper(regex);
 	}
-
+	
 	TEST(StrToJob, AllZeroes) {
 		constexpr job_info expected = job_info{ 0, 0, 0, resource_info{0, 0, 0} };
 		regex_info *regex = regex_init(JOB_REGEX);
@@ -33,7 +39,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample0) {
@@ -44,7 +50,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample1) {
@@ -55,7 +61,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample2) {
@@ -66,7 +72,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample3) {
@@ -77,7 +83,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample4) {
@@ -88,7 +94,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample5) {
@@ -99,7 +105,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample6) {
@@ -110,7 +116,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample7) {
@@ -121,7 +127,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample8) {
@@ -132,7 +138,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 	TEST(StrToJob, StandardExample9) {
@@ -143,7 +149,7 @@ namespace {
 		EXPECT_EQ(job.id, expected.id);
 		EXPECT_EQ(job.est_runtime, expected.est_runtime);
 		EXPECT_EQ(job.req_resc, expected.req_resc);
-		free(regex);
+		regexFreeHelper(regex);
 	}
 
 }
