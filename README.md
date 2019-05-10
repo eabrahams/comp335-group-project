@@ -28,7 +28,7 @@ In this branch are the Best-Fit and Worst-Fit algorithms, implemented in C.
 NOTE: # means running in a shell as root (replace with sudo when running as normal user)
 ### Install up-to-date GCC and libraries on Ubuntu 16.04:
 ```bash
- # add-apt-repository ppa:ubuntu-toolchain-r/test
+root@server:# add-apt-repository ppa:ubuntu-toolchain-r/test
  # apt-get update
  # apt-get install gcc-8 g++-8 libpcre2-dev libtinyxml-dev make
  # update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
