@@ -17,16 +17,14 @@ server_info *worst_fit(system_config* config, server_group *candidates, job_info
 	
 	// need to handle case where there's a "better" server that isn't in candidates because it isn't really better
 
-	for(auto s = 0; s < candidates->num_servers; ++s) { //candidates? or config?
-		auto server = candidates->servers[s];
+	for(auto s = 0; s < config->num_servers; ++s) { //candidates? or config?
+		auto server = &config->servers[s];
 		if(!job.can_run(server->avail_resc)) continue;	
 		if(server->state == server_state::SS_UNAVAILABLE) continue;
 		int fitness = job.fitness(server->avail_resc);
 		if(fitness > worst_fit && server->avail_time <= job.submit_time && (server->state == SS_ACTIVE || server->state == SS_IDLE)) {
 			worst_fit = fitness;
 			worst_server = server;
-		//} else if(server->avail_time == -1) {
-		//	continue;
 		} else if(fitness > other_fit && server->avail_time <= job.submit_time + WAIT_THRESHOLD) {
 			other_fit = fitness;
 			other_server = server;
