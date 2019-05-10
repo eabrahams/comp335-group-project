@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "stringhelper.h"
 #include "job_info.h"
 
@@ -6,10 +7,8 @@
 #include <string.h>
 
 char *create_schd_str(unsigned int id, char *server_name, int server_id) {
-	size_t len;
-	len = snprintf(NULL, 0, "%s %u %s %d", "SCHD", id, server_name, server_id) + 1;
-	char *schd = malloc(sizeof *schd * len);
-	snprintf(schd, len, "%s %u %s %d", "SCHD", id, server_name, server_id);
+	char *schd;
+	asprintf(schd, "%s %u %s %d", "SCHD", id, server_name, server_id);
 	return schd;
 }
 
