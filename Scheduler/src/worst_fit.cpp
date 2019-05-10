@@ -4,8 +4,6 @@
 #include <limits>
 #include <cstdint>
 
-constexpr intmax_t WAIT_THRESHOLD = 100;
-
 server_info *worst_fit(system_config* config, server_group *candidates, job_info job) {
 	intmax_t worst_fit, other_fit, type_fit;
 	server_info *worst_server, *other_server, *type_server;
@@ -23,7 +21,7 @@ server_info *worst_fit(system_config* config, server_group *candidates, job_info
 				worst_fit = fitness;
 				worst_server = server;
 
-			} else if(fitness > other_fit && server->avail_time <= static_cast<intmax_t>(job.submit_time) + WAIT_THRESHOLD) {
+			} else if(fitness > other_fit && server->avail_time <= static_cast<intmax_t>(job.submit_time + server->type->bootTime)) {
 				other_fit = fitness;
 				other_server = server;
 			}
