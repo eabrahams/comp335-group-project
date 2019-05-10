@@ -75,7 +75,7 @@ bool client_msg_resp(socket_client *client, const char *msg, const char *expecte
 	client_send(client, msg);
 	char *response = client_receive(client);
 	if (strncmp(response, expected_response, len) != 0) {
-		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu\n", expected_response, len, response, strlen(response));
+		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu in response to \"%s\" of size %lu\n", expected_response, len, response, strlen(response), msg, strlen(msg));
 		//fprintf(stderr, "%s%s%s%s%c\n", "expected \"", expected_response, "\" but received \"", response, '"');
 		result = false;
 	}
