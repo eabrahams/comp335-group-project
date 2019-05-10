@@ -12,7 +12,7 @@ CFLAGS = -std=gnu11
 CXX = clang++
 CXXFLAGS = -std=gnu++11
 
-all: algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8
+all: algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o stringhelper.o cpp_util.o worst_fit.o -ltinyxml -lpcre2-8
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(BINARY) $^
 
 main.o: main.c
@@ -31,7 +31,9 @@ stringhelper.o: stringhelper.c stringhelper.h
 
 cpp_util.o: cpp_util.cpp cpp_util.h
 
-test: gtest-all.o gtest_main.o system_config.test.o job_info.test.o resource_info.test.o stringhelper.test.o system_config.o job_info.o resource_info.o socket_client.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8 -lpthread
+worst_fit.o: worst_fit.cpp worst_fit.h
+
+test: gtest-all.o gtest_main.o system_config.test.o job_info.test.o resource_info.test.o stringhelper.test.o worst_fit.test.o system_config.o job_info.o resource_info.o socket_client.o stringhelper.o cpp_util.o worst_fit.o -ltinyxml -lpcre2-8 -lpthread
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(TEST) $^
 	./$(TEST)
 
@@ -48,6 +50,8 @@ job_info.test.o: job_info.test.cpp
 resource_info.test.o: resource_info.test.cpp
 
 stringhelper.test.o: stringhelper.test.cpp
+
+worst_fit.test.o: worst_fit.test.cpp
 
 clean:
 	rm -f *.o

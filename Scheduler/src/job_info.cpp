@@ -2,9 +2,6 @@
 #include "cpp_util.h"
 ASSERT_IS_POD(job_info);
 
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
 #include <stdexcept>
 #include <limits>
 

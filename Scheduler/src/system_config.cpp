@@ -6,11 +6,8 @@ ASSERT_IS_POD(system_config);
 
 #include <tinyxml.h>
 #include <iostream>
-#include <cstring>
-#include <memory>
-#include <vector>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 inline namespace {
 
