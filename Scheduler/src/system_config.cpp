@@ -101,15 +101,15 @@ void system_config::update(socket_client *client) {
 }
 
 void system_config::update(socket_client *client, const server_type *type) {
-	std::ostringstream request("RESC Type ");
-	request << type->name;
+	std::ostringstream request;
+	request << "RESC Type " << type->name;
 	if(!client_msg_resp(client, request.str().c_str(), "DATA")) throw std::runtime_error("Server did not respond as expected!");
 	else process_update(this, client);
 };
 
 std::vector<server_info *> system_config::update(socket_client *client, const resource_info &resc) {
-	std::ostringstream request("RESC Avail ");
-	request << resc.cores << " " << resc.memory << " " << resc.disk;
+	std::ostringstream request;
+	request << "RESC Avail " << resc.cores << " " << resc.memory << " " << resc.disk;
 	if(!client_msg_resp(client, request.str().c_str(), "DATA")) throw std::runtime_error("Server did not respond as expected!");
 	else return process_update(this, client);
 }
