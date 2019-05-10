@@ -70,35 +70,13 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		return NULL;
 	}
 	server_info *best;
-	//bool best_found = false;
-	unsigned long best_fitness = ULONG_MAX;
+	bool best_found = false;
+	size_t best_fitness = ULONG_MAX;
 	size_t i;
 	for (i = 0; i < config->num_servers; i++) {
 		server_info *server = &config->servers[i];
-		if (job_can_run(&job, server->avail_resc)) {
-			unsigned long fitness = job_fitness(&job, server->avail_resc);
-			if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
-				best = server;
-				best_fitness = fitness;
-			}
-		}
-	}
-	if (best)
-		return best;
-	
-	for (i = 0; i < config->num_servers; i++) {
-		server_info *server = &config->servers[i];
-		if (server->state == SS_UNAVAILABLE || !job_can_run(&job, server->type->max_resc))
+		if (server->state == SS_UNAVAILABLE)
 			continue;
-		unsigned long fitness = job_fitness(&job, server->type->max_resc);
-		if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
-			best = server;
-			best_fitness = fitness;
-		}
-	}
-	/*
-	for (i = 0; i < group->num_servers; i++) {
-		server_info *server = group->servers[i];
 		const resource_info *resc;
 		if (!best_found) {
 			if (job_can_run(&job, server->avail_resc)) {
@@ -107,20 +85,19 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 				best_found = true;
 				continue;
 			}
+
 			resc = &server->type->max_resc;
 		} else {
 			resc = &server->avail_resc;
 		}
 		if (job_can_run(&job, *resc)) {
-			int fitness = job_fitness(&job, *resc);
+			size_t fitness = job_fitness(&job, *resc);
 			if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
 				best = server;
 				best_fitness = fitness;
 			}
 		}
 	}
-	*/
-
 	return best;
 }
 
