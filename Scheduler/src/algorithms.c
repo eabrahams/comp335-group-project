@@ -62,14 +62,14 @@ server_info *all_to_largest(system_config *config, server_group *group, job_info
 
 server_info *first_fit(system_config *config, server_group *group, job_info job) {
 	if (!config || !group)
-		fprintf(stderr, "config or group not defined for job %d\n", job.id);
+		fprintf(stderr, "config or group not defined for job %u\n", job.id);
 	puts("not yet implemented");
 	return NULL;
 }
 
 server_info *best_fit(system_config *config, server_group *group, job_info job) {
 	if (!config || !group) {
-		fprintf(stderr, "%s\n", "config or group not defined");
+		fprintf(stderr, "%s%u\n", "config or group not defined for job ", job.id);
 		return NULL;
 	}
 	server_info *best, *other;
@@ -86,7 +86,6 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 				best_fitness = job_fitness(&job, server->avail_resc);
 				continue;
 			}
-
 			resc = &server->type->max_resc;
 		} else {
 			resc = &server->avail_resc;
@@ -105,7 +104,7 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 
 server_info *worst_fit(system_config *config, server_group *group, job_info job) {
 	if (!config || !group)
-		fprintf(stderr, "config or group not defined for job %d\n", job.id);
+		fprintf(stderr, "config or group not defined for job %u\n", job.id);
 	puts("not yet implemented");
 	return NULL;
 }
