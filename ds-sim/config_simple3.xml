@@ -18,9 +18,9 @@
   <jobs>
 	<job type="instant" minRunTime="1" maxRunTime="30" populationRate="10" />
 	<job type="short" minRunTime="11" maxRunTime="180" populationRate="20" />
-	<job type="medium" minRunTime="301" maxRunTime="900" populationRate="30" />
-	<job type="long" minRunTime="1801" maxRunTime="43200" populationRate="30" />
-	<job type="perminent" minRunTime="3601" maxRunTime="1000000" populationRate="10" />
+	<job type="medium" minRunTime="301" maxRunTime="900" populationRate="10" />
+	<job type="long" minRunTime="1801" maxRunTime="43200" populationRate="20" />
+	<job type="perminent" minRunTime="3601" maxRunTime="1000000" populationRate="40" />
   </jobs>
   <!-- define system load -->
   <!-- attributes: type: workload pattern, minLoad: min load, maxLoad: max load, 
@@ -36,6 +36,6 @@
 	<!-- simulation terminates whichever condition meets first -->
 	<!-- 60 seconds * 60 minutes * 24 hours * 3 days = 129600 seconds -->
 	<condition type="endtime" value="129600" />
-	<condition type="jobcount" value="1000" />
+	<condition type="jobcount" value="100" />
   </termination>
 </config>
