@@ -5,6 +5,8 @@
 #include <pcre2.h>
 #include "job_info.h"
 
+#define JOB_REGEX "JOBN ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)"
+
 typedef struct {
 	pcre2_code *re;
 	pcre2_match_data *match_data;
