@@ -27,8 +27,11 @@ bool job_can_run(const job_info *job, const resource_info resc) noexcept {
 intmax_t job_fitness(const job_info *job, const resource_info resc) noexcept {
 	// worst_fit algorithm actually requires fitness for non-runnable jobs
 	try {
+
 		return job->fitness(resc);
+
 	} catch(...) {
+
 		return std::numeric_limits<intmax_t>::min();
 	}
 };
