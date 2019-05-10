@@ -2,13 +2,14 @@
 #include "cpp_util.h"
 
 #include <limits>
+#include <cstdint>
 
-constexpr int WAIT_THRESHOLD = 100;
+constexpr intmax_t WAIT_THRESHOLD = 100;
 
 server_info *worst_fit(system_config* config, server_group *candidates, job_info job) {
-	int worst_fit, other_fit, type_fit;
+	intmax_t worst_fit, other_fit, type_fit;
 	server_info *worst_server, *other_server, *type_server;
-	worst_fit = other_fit = type_fit = std::numeric_limits<int>::min();
+	worst_fit = other_fit = type_fit = std::numeric_limits<intmax_t>::min();
 
 	for(auto s = 0; s < config->num_servers; ++s) {
 		auto server = &config->servers[s];
@@ -16,19 +17,19 @@ server_info *worst_fit(system_config* config, server_group *candidates, job_info
 		if(server->state == server_state::SS_UNAVAILABLE) continue;
 
 		else if(job.can_run(server->avail_resc)) {
-			int fitness = job.fitness(server->avail_resc);
+			intmax_t fitness = job.fitness(server->avail_resc);
 
-			if(fitness > worst_fit && server->avail_time <= static_cast<int>(job.submit_time) && (server->state == SS_ACTIVE || server->state == SS_IDLE)) {
+			if(fitness > worst_fit && server->avail_time <= static_cast<intmax_t>(job.submit_time) && (server->state == SS_ACTIVE || server->state == SS_IDLE)) {
 				worst_fit = fitness;
 				worst_server = server;
 
-			} else if(fitness > other_fit && server->avail_time <= static_cast<int>(job.submit_time) + WAIT_THRESHOLD) {
+			} else if(fitness > other_fit && server->avail_time <= static_cast<intmax_t>(job.submit_time) + WAIT_THRESHOLD) {
 				other_fit = fitness;
 				other_server = server;
 			}
 
 		} else if(job.can_run(server->type->max_resc)) {
-			int fitness = job.fitness(server->type->max_resc);
+			intmax_t fitness = job.fitness(server->type->max_resc);
 
 			if(fitness > type_fit) {
 				type_fit = fitness;
