@@ -21,7 +21,7 @@ public class Client {
     
     //list of SERVER
     ArrayList<Server> listServer = new ArrayList<>();
-    HashMap<String,Server[]> newListServer = new HashMap<>();
+    HashMap<String, Server[]> newListServer = new HashMap<>();
     
     //storing initial server state
     ArrayList<Server> initServer = new ArrayList<>();
@@ -63,16 +63,19 @@ public class Client {
     }
     
     //reading message and returning message
-    public String readLine(Socket s) throws UnsupportedEncodingException, IOException
+    public String lineReader(Socket s) throws UnsupportedEncodingException, IOException
     {
         Job j = new Job();
+        
         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));//receive buffer
-        String line = input.readLine();
+        
+        String line = input.lineReader();
 
         if(line.contains(("JOBN"))) {
             addJob(line);
             System.out.println(currentJob.toString());
         }
+        
         return line;
     }
     
@@ -91,7 +94,7 @@ public class Client {
     	
     	pr.write(sendToServer("SCHD "+currentJob.jobID+" "+str));
     	System.out.println(">>> "+currentJob.jobID+" SCHEDULED TO :"+str);
-        if (readLine(s).contains("OK"))
+        if (lineReader(s).contains("OK"))
         {
             currentJob.jobDone();
             listServer.clear();
@@ -110,7 +113,7 @@ public class Client {
     public void okSender(PrintStream send) throws IOException {
     	while(true)
         {
-        	String serverString = readLine(socket); //get server info or "DATA"
+        	String serverString = lineReader(socket); //get server info or "DATA"
         	//System.out.println(serverString);
         	if(serverString.contains("DATA"))
         	{
@@ -164,21 +167,24 @@ public class Client {
     public Client(String ip, int port, Integer algNumber) throws UnknownHostException, IOException
     {
         socket = new Socket(ip, port);
+        
         System.out.println("Connected with server");
         System.out.println("--------------------------------------------------------------");
         System.out.println();
         
         PrintStream send = new PrintStream(socket.getOutputStream()); //send message
 
-        //protocol
+        //socket connection protocol
         ArrayList<String> al = new ArrayList<String>();
+        
         al.add("HELO");
         al.add("AUTH user");
         al.add("REDY");
-        for(String s : al)
+        
+        for(String n : al)
         {
-            send.write(sendToServer(s));
-            String reply = readLine(socket);
+            send.write(sendToServer(n));
+            String reply = lineReader(socket);
         }
 
         send.write(sendToServer("RESC All"));
@@ -193,7 +199,7 @@ public class Client {
         while(true)
         {
         	send.write(sendToServer("REDY"));
-        	String str = readLine(socket);
+        	String str = lineReader(socket);
         	if(str.contains("JOBN"))
         	{
         		send.write(sendToServer("RESC All"));

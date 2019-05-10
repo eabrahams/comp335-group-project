@@ -8,7 +8,7 @@ public class Job{
 	int memory;
 	int disk;
 	
-	boolean scheduled;
+	boolean complete;
 	
 	public Job()
 	{
@@ -30,8 +30,8 @@ public class Job{
     	this.memory = Integer.parseInt(arr[5]);
     	this.disk = Integer.parseInt(arr[6]);
 		
-		//assigning scheduled to false as default
-    	this.scheduled = false;	
+		//assigning complete to false as default
+    	this.complete = false;	
     }
     
     public String getJobRESC()
@@ -39,10 +39,10 @@ public class Job{
     	return this.core + " " + this.memory + " " + this.disk;
     }
     
-	//changing scheduled to true as the job gets done
+	//changing complete to true as the job gets done
     public void jobDone()
     {
-        this.scheduled = true;
+        this.complete = true;
     }
     
     public String toString()
