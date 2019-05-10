@@ -57,25 +57,25 @@ public class Client {
     public byte[] sendToServer(String s)
     {
         String temp = s+"\n";
+        
         byte[] bytes = temp.getBytes();
+        
         return bytes;
 
     }
     
     //reading message and returning message
-    public String lineReader(Socket s) throws UnsupportedEncodingException, IOException
+    public String readLine(Socket s) throws UnsupportedEncodingException, IOException
     {
         Job j = new Job();
         
         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));//receive buffer
-        
-        String line = input.lineReader();
+        String line = input.readLine();
 
         if(line.contains(("JOBN"))) {
             addJob(line);
             System.out.println(currentJob.toString());
         }
-        
         return line;
     }
     
@@ -83,8 +83,9 @@ public class Client {
     public void scheduleJob(PrintStream pr, Socket s, Integer useAlg) throws UnsupportedEncodingException, IOException //add parser par
     {
     	String str = null;
+    	
     	if (useAlg == null) //null or not ff
-    		str = listServer.get(listServer.size()-1).serverType+" 0"; //scheduling to the largest
+    		str = listServer.get(listServer.size()-1).serverType+" 0"; //schedules to the largest
     	else if (useAlg == 1)
     		str = getFirstFit();
 //        else if (useAlg == 2)
@@ -94,7 +95,7 @@ public class Client {
     	
     	pr.write(sendToServer("SCHD "+currentJob.jobID+" "+str));
     	System.out.println(">>> "+currentJob.jobID+" SCHEDULED TO :"+str);
-        if (lineReader(s).contains("OK"))
+        if (readLine(s).contains("OK"))
         {
             currentJob.jobDone();
             listServer.clear();
@@ -113,7 +114,7 @@ public class Client {
     public void okSender(PrintStream send) throws IOException {
     	while(true)
         {
-        	String serverString = lineReader(socket); //get server info or "DATA"
+        	String serverString = readLine(socket); //get server info or "DATA"
         	//System.out.println(serverString);
         	if(serverString.contains("DATA"))
         	{
@@ -167,24 +168,22 @@ public class Client {
     public Client(String ip, int port, Integer algNumber) throws UnknownHostException, IOException
     {
         socket = new Socket(ip, port);
-        
         System.out.println("Connected with server");
         System.out.println("--------------------------------------------------------------");
         System.out.println();
         
-        PrintStream send = new PrintStream(socket.getOutputStream()); //send message
+        //for sending the message
+        PrintStream send = new PrintStream(socket.getOutputStream());
 
         //socket connection protocol
         ArrayList<String> al = new ArrayList<String>();
-        
         al.add("HELO");
         al.add("AUTH user");
         al.add("REDY");
-        
-        for(String n : al)
+        for(String s : al)
         {
-            send.write(sendToServer(n));
-            String reply = lineReader(socket);
+            send.write(sendToServer(s));
+            String reply = readLine(socket);
         }
 
         send.write(sendToServer("RESC All"));
@@ -199,7 +198,7 @@ public class Client {
         while(true)
         {
         	send.write(sendToServer("REDY"));
-        	String str = lineReader(socket);
+        	String str = readLine(socket);
         	if(str.contains("JOBN"))
         	{
         		send.write(sendToServer("RESC All"));
