@@ -1,12 +1,7 @@
 #include "worst_fit.h"
 #include "cpp_util.h"
 
-#include <cstdint>
-#include <cstring>
-#include <iostream>
-#include <memory>
 #include <limits>
-#include <sstream>
 
 constexpr int WAIT_THRESHOLD = 100;
 
@@ -44,7 +39,7 @@ server_info *worst_fit(system_config* config, server_group *candidates, job_info
 
 	if(worst_fit >= 0) return worst_server;
 	
-	if(other_fit >= 0) return other_server;
+	else if(other_fit >= 0) return other_server;
 
-	return type_server;
+	else return type_server;
 }

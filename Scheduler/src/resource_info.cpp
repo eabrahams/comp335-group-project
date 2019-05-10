@@ -1,5 +1,4 @@
 #include "resource_info.h"
-#include "cpp_util.h"
 ASSERT_IS_POD(resource_info);
 
 bool operator<(const resource_info &lhs, const resource_info &rhs)  noexcept {
