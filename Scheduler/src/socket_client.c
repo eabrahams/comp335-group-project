@@ -53,7 +53,7 @@ char *client_receive(socket_client *client) {
 	char *buffer = malloc(sizeof *buffer * BUF_SIZE);
 	int length = read(client->fd, buffer, BUF_SIZE - 1);
 	buffer[length] = '\0';
-	char *msg = malloc(sizeof *msg * length);
+	char *msg = calloc(length + 1, sizeof *msg);
 	strncpy(msg, buffer, length);
 	free(buffer);
 	return msg;
@@ -70,7 +70,7 @@ bool client_msg_resp(socket_client *client, const char *msg, const char *expecte
 	client_send(client, msg);
 	char *response = client_receive(client);
 	if (strncmp(response, expected_response, len) != 0) {
-		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu", expected_response, len, response, strlen(response));
+		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu\n", expected_response, len, response, strlen(response));
 		//fprintf(stderr, "%s%s%s%s%c\n", "expected \"", expected_response, "\" but received \"", response, '"');
 		result = false;
 	}

@@ -8,12 +8,10 @@
 void usage(char *name);
 
 int main(int argc, char **argv) {
-	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
-
 	server_info *(*algorithm)(system_config*,server_group*,job_info) = &all_to_largest;
 
 	int i;
-	for (i = 0; i < argc; i++) {
+	for (i = 1; i < argc; i++) {
 		if (argv[i][0] == '-') {
 			switch(argv[i][1]) {
 				case 'a':
@@ -34,6 +32,8 @@ int main(int argc, char **argv) {
 			usage(argv[0]);
 		}
 	}
+
+	socket_client *client = client_init(LOCALHOST, DEFAULT_PORT);
 
 	run_algorithm(client, algorithm);
 
