@@ -72,18 +72,18 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		fprintf(stderr, "%s%u\n", "config or group not defined for job ", job.id);
 		return NULL;
 	}
-	server_info *best, *other;
-	server_info **current = &other;
+	server_info *best;
+	bool best_found = false;
 	int best_fitness = INT_MAX;
 	size_t i;
 	for (i = 0; i < group->num_servers; i++) {
 		server_info *server = group->servers[i];
 		const resource_info *resc;
-		if (!best) {
+		if (!best_found) {
 			if (job_can_run(&job, server->avail_resc)) {
-				current = &best;
 				best = server;
 				best_fitness = job_fitness(&job, server->avail_resc);
+				best_found = true;
 				continue;
 			}
 			resc = &server->type->max_resc;
@@ -92,14 +92,14 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		}
 		if (job_can_run(&job, *resc)) {
 			int fitness = job_fitness(&job, *resc);
-			if (!*current || fitness < best_fitness || (fitness == best_fitness && server->avail_time < (*current)->avail_time)) {
+			if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best.avail_time)) {
+				best = server;
 				best_fitness = fitness;
-				*current = server;
 			}
 		}
 	}
 
-	return *current;
+	return best;
 }
 
 server_info *worst_fit(system_config *config, server_group *group, job_info job) {
