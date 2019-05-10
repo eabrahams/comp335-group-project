@@ -23,7 +23,7 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 		free(resp);
 
 		if (!update_config(config, client)) {
-			fprintf(stderr, "unable to updated server information for job %d\n", job.id);
+			fprintf(stderr, "unable to updated server information for job %lu\n", job.id);
 		}
 
 		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
@@ -31,7 +31,7 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 		free_group(avail_servers);
 
 		if (!choice) {
-			fprintf(stderr, "unable to find server for job %d\n", job.id);
+			fprintf(stderr, "unable to find server for job %lu\n", job.id);
 			break;
 		}
 
