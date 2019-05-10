@@ -77,46 +77,13 @@ bool client_msg_resp(socket_client *client, const char *msg, const char *expecte
 	client_send(client, msg);
 	char *response = client_receive(client);
 	if (strncmp(response, expected_response, len) != 0) {
-		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu", expected_response, len, response, strlen(response));
+		fprintf(stderr, "expected \"%s\" of size %lu but received \"%s\" of size %lu\n", expected_response, len, response, strlen(response));
 		//fprintf(stderr, "%s%s%s%s%c\n", "expected \"", expected_response, "\" but received \"", response, '"');
 		result = false;
 	}
 	free(response);
 
 	return result;
-}
-
-void client_run_algorithm(socket_client *client, server_info *(*algorithm)(system_config*,server_group*,job_info)) {
-	regex_info *job_regex = regex_init(JOB_REGEX);
-	system_config *config = parse_config("system.xml");
-	while (true) {
-		client_send(client, "REDY");
-		char *resp = client_receive(client);
-		if (strncmp(resp, "NONE", 4) == 0)
-			break;
-
-		job_info job = strtojob(resp, job_regex);
-		free(resp);
-
-		if (!update_config(config, client)) {
-			fprintf(stderr, "unable to update server information for job %d\n", job.id);
-			break;
-		}
-
-		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
-		server_info *choice = algorithm(config, avail_servers, job);
-		if (!choice) {
-			fprintf(stderr, "best not found for job %d\n", job.id);
-			break;
-		}
-		char *schd = create_schd_str(job.id, choice->type->name, choice->id);
-		bool success = client_msg_resp(client, schd, "OK");
-		if (!success)
-			break;
-	}
-
-	client_send(client, "QUIT");
-	free_config(config);
 }
 
 void client_free(socket_client *client) {
