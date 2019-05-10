@@ -26,9 +26,11 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 			break;
 		}
 
-		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
-		server_info *choice = algorithm(config, avail_servers, job);
-		free_group(avail_servers);
+		//server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+		//server_info *choice = algorithm(config, avail_servers, job);
+		//free_group(avail_servers);
+		server_group g;
+		server_info *choice = algorithm(config, &g, job);
 
 		if (!choice) {
 			fprintf(stderr, "unable to find server for job %d\n", job.id);
@@ -71,9 +73,33 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		return NULL;
 	}
 	server_info *best;
-	bool best_found = false;
+	//bool best_found = false;
 	int best_fitness = INT_MAX;
 	size_t i;
+	for (i = 0; i < config->num_servers; i++) {
+		server_info *server = &config->servers[i];
+		if (job_can_run(&job, server->avail_resc)) {
+			int fitness = job_fitness(&job, server->avail_resc);
+			if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
+				best = server;
+				best_fitness = fitness;
+			}
+		}
+	}
+	if (best)
+		return best;
+	
+	for (i = 0; i < config->num_servers; i++) {
+		server_info *server = &config->servers[i];
+		if (server->state == SS_UNAVAILABLE || !job_can_run(&job, server->type->max_resc))
+			continue;
+		int fitness = job_fitness(&job, server->type->max_resc);
+		if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
+			best = server;
+			best_fitness = fitness;
+		}
+	}
+	/*
 	for (i = 0; i < group->num_servers; i++) {
 		server_info *server = group->servers[i];
 		const resource_info *resc;
@@ -96,6 +122,7 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 			}
 		}
 	}
+	*/
 
 	return best;
 }
