@@ -13,7 +13,7 @@ char *create_schd_str(unsigned int id, char *server_name, int server_id) {
 	return schd;
 }
 
-regex_info *regex_init(char *regex_str) {
+regex_info *regex_init(const char *regex_str) {
 	regex_info *info = malloc(sizeof *info);
 
 	int errnum;
@@ -32,7 +32,7 @@ regex_info *regex_init(char *regex_str) {
 	return info;
 }
 
-job_info strtojob(char *jobstr, regex_info *regex) {
+job_info strtojob(const char *jobstr, regex_info *regex) {
 	//pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(re, NULL);
 	//regex->match_data = pcre2_match_data_create_from_pattern(regex->re, NULL);
 	int rc = pcre2_match(regex->re, (PCRE2_SPTR)jobstr, strlen(jobstr), 0, 0, regex->match_data, NULL);
@@ -56,11 +56,12 @@ job_info strtojob(char *jobstr, regex_info *regex) {
 	unsigned long values[rc - 1];
 	int i;
 	size_t substring_len;
-	char *substring, *tmpstr;
+	const char *substring;
+	char *tmpstr;
 	for (i = 1; i < rc; i++) {
 		substring = jobstr + ovector[2*i];
 		substring_len = ovector[2*i+1] - ovector[2*i];
-		tmpstr = malloc(sizeof *tmpstr * substring_len);
+		tmpstr = calloc(sizeof *tmpstr, substring_len + 1);
 		strncpy(tmpstr, substring, substring_len);
 		values[i-1] = strtoul(tmpstr, NULL, 0);
 		free(tmpstr);

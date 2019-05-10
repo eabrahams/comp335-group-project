@@ -36,6 +36,6 @@
 	<!-- simulation terminates whichever condition meets first -->
 	<!-- 60 seconds * 60 minutes * 24 hours * 3 days = 129600 seconds -->
 	<condition type="endtime" value="129600" />
-	<condition type="jobcount" value="1000" />
+	<condition type="jobcount" value="500" />
   </termination>
 </config>

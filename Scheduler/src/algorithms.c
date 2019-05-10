@@ -9,8 +9,6 @@
 #include "system_config.h"
 #include "job_info.h"
 
-#define JOB_REGEX "JOBN ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)"
-
 void run_algorithm(socket_client *client, server_info *(*algorithm)(system_config*, server_group*, job_info)) {
 	regex_info *job_regex = regex_init(JOB_REGEX);
 	system_config *config = parse_config("system.xml");

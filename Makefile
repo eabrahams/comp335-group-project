@@ -34,7 +34,7 @@ stringhelper.o: stringhelper.c stringhelper.h
 
 cpp_util.o: cpp_util.cpp cpp_util.h
 
-test: gtest-all.o gtest_main.o system_config.test.o job_info.test.o resource_info.test.o system_config.o job_info.o resource_info.o socket_client.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8 -lpthread
+test: gtest-all.o gtest_main.o system_config.test.o job_info.test.o resource_info.test.o stringhelper.test.o system_config.o job_info.o resource_info.o socket_client.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8 -lpthread
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(TEST) $^
 	./$(TEST)
 
@@ -49,6 +49,8 @@ system_config.test.o: system_config.test.cpp
 job_info.test.o: job_info.test.cpp
 
 resource_info.test.o: resource_info.test.cpp
+
+stringhelper.test.o: stringhelper.test.cpp
 
 clean:
 	rm -f *.o
