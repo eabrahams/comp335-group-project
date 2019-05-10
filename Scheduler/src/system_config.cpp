@@ -25,8 +25,7 @@ inline namespace {
 			return false;
 
 		} else {
-			*dest_ptr = static_cast<char *>(malloc(strlen(attr_ptr) + 1));
-			strcpy(*dest_ptr, attr_ptr);
+			*dest_ptr = strdup(attr_ptr);
 
 			return true;
 		}
@@ -47,20 +46,6 @@ inline namespace {
 		} else return true;
 	}
 
-	/*
-	check if an element has a non-negative integer attribute with a given name,
-	copying the value to dest_ptr and returning true if it does, otherwise
-	returning false and logging to stderr.
-	*/
-	bool get_unsigned_int_attribute(const TiXmlElement *node, const char *attr_name, unsigned *dest_ptr) noexcept {
-
-		if(node->QueryUnsignedAttribute(attr_name, dest_ptr) != TIXML_SUCCESS) {
-			std::cerr << "Parser: bad member element: must have unsigned integer attribute '" << attr_name << "'\n";
-
-			return false;
-
-		} else return true;
-	}
 
 	/*
 	check if an element has a positive floating-point attribute with a given name,
