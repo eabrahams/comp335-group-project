@@ -25,20 +25,19 @@ In this branch are the Best-Fit and Worst-Fit algorithms, implemented in C.
 * tinyxml
 * PCRE2
 
-NOTE: root means running in as root user (run commands with sudo when running as normal user)
 ### Install up-to-date GCC and libraries on Ubuntu 16.04:
 ```bash
-[root@server]$ add-apt-repository ppa:ubuntu-toolchain-r/test
-[root@server]$ apt-get update
-[root@server]$ apt-get install gcc-8 g++-8 libpcre2-dev libtinyxml-dev make
-[root@server]$ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+$ sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+$ sudo apt-get update
+$ sudo apt-get install gcc-8 g++-8 libpcre2-dev libtinyxml-dev make
+$ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 ```
 
 ### Install Clang and libraries on Ubuntu 16.04:
 ```bash
-[root@server]$ apt-get update
-[root@server]$ apt-get install clang4.0 libpcre2-dev libtinyxml-dev make
-[root@server]$ update-alternatives --install /usr/bin/clang clang /usr/bin/clang-4.0 400 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-4.0
+$ sudo apt-get update
+$ sudo apt-get install clang4.0 libpcre2-dev libtinyxml-dev make
+$ sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-4.0 400 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-4.0
 ```
 
 ### Build
