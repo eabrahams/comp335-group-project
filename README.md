@@ -48,5 +48,5 @@ make
 
 ### Run
 ```bash
-./ds-client [-a ALGORITHM] # in same directory as server
+./ds-client [-a ALGORITHM] # in same directory as server, while server is running
 ```
