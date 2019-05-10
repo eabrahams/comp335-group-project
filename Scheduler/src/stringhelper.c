@@ -61,7 +61,7 @@ job_info strtojob(const char *jobstr, regex_info *regex) {
 	for (i = 1; i < rc; i++) {
 		substring = jobstr + ovector[2*i];
 		substring_len = ovector[2*i+1] - ovector[2*i];
-		tmpstr = calloc(sizeof *tmpstr, substring_len + 1);
+		tmpstr = calloc(substring_len + 1, sizeof *tmpstr);
 		strncpy(tmpstr, substring, substring_len);
 		values[i-1] = strtoul(tmpstr, NULL, 0);
 		free(tmpstr);
