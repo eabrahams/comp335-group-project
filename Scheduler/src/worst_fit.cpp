@@ -13,9 +13,7 @@ constexpr unsigned WORST_FIT_AVAIL_TIME_THRESHOLD = 600; // ten minutes
 server_info *worst_fit(system_config* config, server_group *candidates, job_info job) {
 	int worst_fit, other_fit, type_fit;
 	server_info *worst_server, *other_server, *type_server;
-	unsigned other_avail_time/*, type_avail_time */;
 	worst_fit = other_fit = type_fit = std::numeric_limits<int>::min();
-	other_avail_time /* = type_avail_time */ = WORST_FIT_AVAIL_TIME_THRESHOLD;
 
 	for(auto s = 0; s < candidates->num_servers; ++s) {
 		auto *server = candidates->servers[s];
@@ -23,10 +21,9 @@ server_info *worst_fit(system_config* config, server_group *candidates, job_info
 		if(fitness > worst_fit && server->state == server_state::SS_IDLE) {
 			worst_fit = fitness;
 			worst_server = server;
-		} else if(fitness >= other_fit && server->avail_time <= other_avail_time) {
+		} else if(fitness >= other_fit && server->avail_time <= WORST_FIT_AVAIL_TIME_THRESHOLD) {
 			other_fit = fitness;
 			other_server = server;
-			other_avail_time = server->avail_time;
 		}
 	}
 
@@ -39,12 +36,11 @@ server_info *worst_fit(system_config* config, server_group *candidates, job_info
 		server_info *server_offset = start_of_type(config, type);
 		for(auto s = 0; s < type->limit; ++s) {
 			auto server = &server_offset[s];
-			if(server->state == server_state::SS_UNAVAILABLE) continue;
+			if(server->state != server_state::SS_ACTIVE) continue;
 			int fitness = job.fitness(server->avail_resc);
-			if(fitness >= type_fit /* && server->avail_time <= type_avail_time */) {
+			if(fitness >= type_fit) {
 				type_fit = fitness;
 				type_server = server;
-				//type_avail_time = server->avail_time;
 			}
 		}
 	}
