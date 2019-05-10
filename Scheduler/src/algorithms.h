@@ -9,6 +9,6 @@ void run_algorithm(socket_client*, server_info*(*alg)(system_config*,server_grou
 server_info *all_to_largest(system_config*, server_group*, job_info);
 server_info *first_fit(system_config*, server_group*, job_info);
 server_info *best_fit(system_config*, server_group*, job_info);
-server_info *worst_fit(system_config*, server_group*, job_info);
+extern server_info *worst_fit(system_config*, server_group*, job_info);
 
 #endif

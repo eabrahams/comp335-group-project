@@ -80,3 +80,6 @@ dkms.conf
 hs_err_pid*
 
 ds-client
+c-client
+gtest-runner
+

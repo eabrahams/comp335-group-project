@@ -22,22 +22,19 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 		free(resp);
 
 		if (!update_config(config, client)) {
-			fprintf(stderr, "unable to update server information for job %d\n", job.id);
-			break;
+			fprintf(stderr, "unable to updated server information for job %lu\n", job.id);
 		}
 
-		//server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
-		//server_info *choice = algorithm(config, avail_servers, job);
-		//free_group(avail_servers);
-		server_group g;
-		server_info *choice = algorithm(config, &g, job);
+		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+		server_info *choice = algorithm(config, avail_servers, job);
 
 		if (!choice) {
-			fprintf(stderr, "unable to find server for job %d\n", job.id);
+			fprintf(stderr, "unable to find server for job %lu\n", job.id);
 			break;
 		}
 
 		char *schd = create_schd_str(job.id, choice->type->name, choice->id);
+		free_group(avail_servers);
 		bool success = client_msg_resp(client, schd, "OK");
 		if (!success)
 			break;
@@ -62,14 +59,14 @@ server_info *all_to_largest(system_config *config, server_group *group, job_info
 
 server_info *first_fit(system_config *config, server_group *group, job_info job) {
 	if (!config || !group)
-		fprintf(stderr, "config or group not defined for job %u\n", job.id);
+		fprintf(stderr, "config or group not defined for job %lu\n", job.id);
 	puts("not yet implemented");
 	return NULL;
 }
 
 server_info *best_fit(system_config *config, server_group *group, job_info job) {
 	if (!config || !group) {
-		fprintf(stderr, "%s%u\n", "config or group not defined for job ", job.id);
+		fprintf(stderr, "%s%lu\n", "config or group not defined for job ", job.id);
 		return NULL;
 	}
 	server_info *best;
@@ -125,12 +122,5 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 	*/
 
 	return best;
-}
-
-server_info *worst_fit(system_config *config, server_group *group, job_info job) {
-	if (!config || !group)
-		fprintf(stderr, "config or group not defined for job %u\n", job.id);
-	puts("not yet implemented");
-	return NULL;
 }
 
