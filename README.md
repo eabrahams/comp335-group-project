@@ -16,7 +16,7 @@ This stage implements the allToLargest algorithm.
 
 ## Compilation
 ### For building:
-* C and C++ compiler that supports C11 and C++17. (Clang 5 or GCC 8)
+* C and C++ compiler that supports C11 and C++11 (Clang 3.4+ or GCC 4.8.1+)
 * GNU Make
 
 ### External Libraries:
