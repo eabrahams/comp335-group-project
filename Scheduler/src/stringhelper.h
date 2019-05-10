@@ -14,6 +14,6 @@ typedef struct {
 
 regex_info *regex_init(const char *pattern);
 job_info strtojob(const char *jobstr, regex_info *regex);
-char *create_schd_str(unsigned int id, char *server_name, int server_id);
+char *create_schd_str(unsigned long id, char *server_name, unsigned long server_id);
 
 #endif

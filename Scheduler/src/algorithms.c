@@ -71,7 +71,7 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 	}
 	server_info *best;
 	//bool best_found = false;
-	unsigned long best_fitness = INT_MAX;
+	unsigned long best_fitness = ULONG_MAX;
 	size_t i;
 	for (i = 0; i < config->num_servers; i++) {
 		server_info *server = &config->servers[i];
@@ -90,7 +90,7 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		server_info *server = &config->servers[i];
 		if (server->state == SS_UNAVAILABLE || !job_can_run(&job, server->type->max_resc))
 			continue;
-		int fitness = job_fitness(&job, server->type->max_resc);
+		unsigned long fitness = job_fitness(&job, server->type->max_resc);
 		if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
 			best = server;
 			best_fitness = fitness;
