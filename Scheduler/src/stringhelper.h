@@ -12,8 +12,8 @@ typedef struct {
 	pcre2_match_data *match_data;
 } regex_info;
 
-regex_info *regex_init(char *pattern);
-job_info strtojob(char *jobstr, regex_info *regex);
+regex_info *regex_init(const char *pattern);
+job_info strtojob(const char *jobstr, regex_info *regex);
 char *create_schd_str(unsigned int id, char *server_name, int server_id);
 
 #endif
