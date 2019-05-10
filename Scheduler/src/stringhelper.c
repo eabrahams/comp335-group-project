@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
-char *create_schd_str(unsigned int id, char *server_name, int server_id) {
+char *create_schd_str(unsigned long id, char *server_name, unsigned long server_id) {
 	char *schd;
-	asprintf(&schd, "%s %u %s %d", "SCHD", id, server_name, server_id);
+	asprintf(&schd, "%s %lu %s %lu", "SCHD", id, server_name, server_id);
 	return schd;
 }
 
