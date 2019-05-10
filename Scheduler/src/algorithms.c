@@ -92,7 +92,7 @@ server_info *best_fit(system_config *config, server_group *group, job_info job) 
 		}
 		if (job_can_run(&job, *resc)) {
 			int fitness = job_fitness(&job, *resc);
-			if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best.avail_time)) {
+			if (!best || fitness < best_fitness || (fitness == best_fitness && server->avail_time < best->avail_time)) {
 				best = server;
 				best_fitness = fitness;
 			}
