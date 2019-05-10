@@ -16,12 +16,13 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
+#include <stdint.h>
 #include "socket_client.h"
 
 typedef struct server_type {
 	char *name; // the human-readable name of the server type
-	unsigned limit; // the maximum number of concurrent instances of this type
-	unsigned bootTime; // how long this type of server takes to start up
+	uintmax_t limit; // the maximum number of concurrent instances of this type
+	uintmax_t bootTime; // how long this type of server takes to start up
 	float rate;
 	resource_info max_resc; // the resources offered by this server type
 #ifdef __cplusplus
@@ -39,12 +40,12 @@ typedef enum server_state {
 
 typedef struct server_info {
 	const server_type *type; // the type of this server
-	int id; // the type-unique identifier of this server
+	size_t id; // the type-unique identifier of this server
 	server_state state; // the current state of this server
-	int avail_time; // can be -1, meaning "available now" (based on RESC example info from spec)
+	intmax_t avail_time; // can be -1, meaning "available now" (based on RESC example info from spec)
 	resource_info avail_resc; // the available resources on this server
 #ifdef __cplusplus
-	bool update(server_state state, int time, const resource_info &resc) noexcept;
+	bool update(server_state state, intmax_t time, const resource_info &resc) noexcept;
 	void reset() noexcept;
 #endif
 } server_info;
