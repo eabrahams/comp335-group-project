@@ -10,7 +10,7 @@ TEST = gtest-runner
 CC = clang
 CFLAGS = -std=gnu11
 CXX = clang++
-CXXFLAGS = -std=gnu++17
+CXXFLAGS = -std=gnu++11
 
 all: algorithms.o job_info.o main.o resource_info.o socket_client.o system_config.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(BINARY) $^
