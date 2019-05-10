@@ -20,3 +20,11 @@ This stage implements the allToLargest algorithm.
 ### Run (with server running)
 `$ java Main`
 
+## Stage 2 (Java implimantation)
+This stage implements the First-Fit algorithm.
+
+### Build
+`$ javac Client.java`
+
+### Run (with server running)
+`$ java Client -a ff`
