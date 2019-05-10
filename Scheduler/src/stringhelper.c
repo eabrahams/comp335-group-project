@@ -8,7 +8,7 @@
 
 char *create_schd_str(unsigned int id, char *server_name, int server_id) {
 	char *schd;
-	asprintf(schd, "%s %u %s %d", "SCHD", id, server_name, server_id);
+	asprintf(&schd, "%s %u %s %d", "SCHD", id, server_name, server_id);
 	return schd;
 }
 
