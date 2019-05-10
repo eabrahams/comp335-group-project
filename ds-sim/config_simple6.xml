@@ -14,10 +14,10 @@
   <!-- the sum of ratio values must be 100 (100%) -->
   <!-- minRunTime and maxRunTime must be 1 or greater bounded by INT_MAX -->
   <jobs>
-	<job type="instant" minRunTime="1" maxRunTime="10" populationRate="40" />
-	<job type="short" minRunTime="11" maxRunTime="300" populationRate="30" />
+	<job type="instant" minRunTime="1" maxRunTime="10" populationRate="10" />
+	<job type="short" minRunTime="11" maxRunTime="300" populationRate="20" />
 	<job type="medium" minRunTime="301" maxRunTime="1800" populationRate="20" />
-	<job type="long" minRunTime="1801" maxRunTime="100000" populationRate="10" />
+	<job type="long" minRunTime="1801" maxRunTime="100000" populationRate="50" />
   </jobs>
   <!-- define system load -->
   <!-- attributes: type: workload pattern, minLoad: min load, maxLoad: max load, 
