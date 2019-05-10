@@ -53,14 +53,12 @@ void client_send(socket_client *client, const char *msg) {
 	send(client->fd, msg, strlen(msg), 0);
 }
 
-/* returns a string that is sent by the server.
- * TODO: find a way that doesn't involve creating
- * a massive string buffer. */
+/* returns a string that is sent by the server. */
 char *client_receive(socket_client *client) {
 	char *buffer = malloc(sizeof *buffer * BUF_SIZE);
 	int length = read(client->fd, buffer, BUF_SIZE - 1);
 	buffer[length] = '\0';
-	char *msg = malloc(sizeof *msg * length);
+	char *msg = calloc(length + 1, sizeof *msg);
 	strncpy(msg, buffer, length);
 	free(buffer);
 	return msg;
