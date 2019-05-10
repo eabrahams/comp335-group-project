@@ -3,6 +3,7 @@
 #define resource_info_h_
 
 #ifdef __cplusplus
+#include "cpp_util.h"
 #ifndef EXTERN_C
 #define EXTERN_C
 #define EXTERN_C_resource_info_h_
@@ -13,10 +14,12 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
+#include <stdint.h>
+
 typedef struct resource_info {
-	unsigned cores; // CPU cores
-	unsigned memory; // memory in MB
-	unsigned disk; // disk in MB
+	uintmax_t cores; // CPU cores
+	uintmax_t memory; // memory in MB
+	uintmax_t disk; // disk in MB
 } resource_info;
 
 // utilities for resource capacity comparison logic
