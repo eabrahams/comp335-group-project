@@ -13,6 +13,7 @@ typedef struct {
 } regex_info;
 
 regex_info *regex_init(const char *pattern);
+void regex_free(regex_info *regex);
 job_info strtojob(const char *jobstr, regex_info *regex);
 char *create_schd_str(unsigned long id, char *server_name, unsigned long server_id);
 

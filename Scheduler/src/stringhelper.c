@@ -31,6 +31,12 @@ regex_info *regex_init(const char *regex_str) {
 	return info;
 }
 
+void regex_free(regex_info *regex) {
+	pcre2_match_data_free(regex->match_data);
+	pcre2_code_free(regex->re);
+	free(regex);
+}
+
 job_info strtojob(const char *jobstr, regex_info *regex) {
 	//pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(re, NULL);
 	//regex->match_data = pcre2_match_data_create_from_pattern(regex->re, NULL);
