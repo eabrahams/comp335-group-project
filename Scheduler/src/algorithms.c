@@ -13,7 +13,8 @@
  * run a given job. That task is given to the funtion pointer called 'algorithm' in this
  * function. In addition to not duplicating code, this allows us to test a scheduling 
  * algorithm without needing a network socket client */
-void run_algorithm(socket_client *client, server_info *(*algorithm)(system_config*, server_group*, job_info)) {
+//void run_algorithm(socket_client *client, server_info *(*algorithm)(system_config*, server_group*, job_info)) {
+void run_algorithm(socket_client *client, algorithm_t algorithm) {
 	// use regexes instead of sscanf
 	regex_info *job_regex = regex_init(JOB_REGEX); // free this once finished
 
@@ -32,8 +33,26 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 		}
 
 		// needs to be freed
-		server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
-		server_info *choice = algorithm(config, avail_servers, job); // do not free
+		//server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+		server_group *avail_servers;
+		server_info *choice;
+		switch(algorithm) {
+			case ALL_TO_LARGEST:
+				choice = all_to_largest(config, job);
+				break;
+			case FIRST_FIT:
+				choice = first_fit(config, job);
+				break;
+			case BEST_FIT:
+				choice = best_fit(config, job);
+				break;
+			case WORST_FIT:
+				avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+				choice = worst_fit(config, avail_servers, job);
+				free_group(avail_servers);
+				break;
+		}
+		//server_info *choice = algorithm(config, avail_servers, job); // do not free
 
 		if (!choice) {
 			fprintf(stderr, "unable to find server for job %lu\n", job.id);
@@ -41,7 +60,6 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 		}
 
 		char *schd = create_schd_str(job.id, choice->type->name, choice->id); // need to free
-		free_group(avail_servers);
 		bool success = client_msg_resp(client, schd, "OK");
 		free(schd);
 		if (!success)
@@ -53,7 +71,8 @@ void run_algorithm(socket_client *client, server_info *(*algorithm)(system_confi
 	regex_free(job_regex);
 }
 
-server_info *all_to_largest(system_config *config, server_group *group, job_info job) {
+//server_info *all_to_largest(system_config *config, server_group *group, job_info job) {
+server_info *all_to_largest(system_config *config, job_info job) {
 	const server_type *largest_type = &config->types[0];
 	size_t i;
 	for (i = 1; i < config->num_types; i++)
@@ -61,21 +80,54 @@ server_info *all_to_largest(system_config *config, server_group *group, job_info
 			largest_type = &config->types[i];
 
 	server_info *largest = start_of_type(config, largest_type);
-	if (!job_can_run(&job, largest->type->max_resc) || !group)
+	if (!job_can_run(&job, largest->type->max_resc))
 		return NULL;
 	return largest;
 }
 
-server_info *first_fit(system_config *config, server_group *group, job_info job) {
-	if (!config || !group)
-		fprintf(stderr, "config or group not defined for job %lu\n", job.id);
+server_info *first_fit(system_config *config, job_info job) {
+	if (!config)
+		fprintf(stderr, "config not defined for job %lu\n", job.id);
 	puts("not yet implemented");
 	return NULL;
 }
 
-server_info *best_fit(system_config *config, server_group *group, job_info job) {
-	if (!config || !group) {
-		fprintf(stderr, "%s%lu\n", "config or group not defined for job ", job.id);
+server_info *best_fit(system_config *config, job_info job) {
+	long best_fit, type_fit;
+	server_info *best_server, *best_type;
+	best_fit = type_fit = LONG_MAX;
+
+	size_t i;
+	for (i = 0; i < config->num_servers; i++) {
+		server_info *server = &config->servers[i];
+
+		if (server->state == SS_UNAVAILABLE)
+			continue;
+
+		if (job_can_run(&job, server->avail_resc)) {
+			long fitness = job_fitness(&job, server->avail_resc);
+			if (fitness < best_fit || (fitness == best_fit && server->avail_time < best_server->avail_time)) {
+				best_server = server;
+				best_fit = fitness;
+			}
+		} else if (job_can_run(&job, server->type->max_resc)) {
+			long fitness = job_fitness(&job, server->type->max_resc);
+			if (fitness < type_fit) {
+				best_type = server;
+				type_fit = fitness;
+			}
+		}
+	}
+
+	if (best_fit < LONG_MAX)
+		return best_server;
+	else
+		return best_type;
+}
+
+server_info *best_fit_old(system_config *config, job_info job) {
+	if (!config) {
+		fprintf(stderr, "%s%lu\n", "config not defined for job ", job.id);
 		return NULL;
 	}
 
