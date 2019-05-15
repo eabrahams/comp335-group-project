@@ -92,25 +92,31 @@ server_info *first_fit(system_config *config, job_info job) {
 	return NULL;
 }
 
+/* send to job with the server with the minimum number of
+ * available resources, or minimum number of max resources
+ * if there is not available one */
 server_info *best_fit(system_config *config, job_info job) {
 	long best_fit, type_fit;
-	server_info *best_server, *best_type;
+	server_info *best_server, *best_type; // use these for the return value
 	best_fit = type_fit = LONG_MAX;
 
 	size_t i;
 	for (i = 0; i < config->num_servers; i++) {
 		server_info *server = &config->servers[i];
 
+		// make sure server is available
 		if (server->state == SS_UNAVAILABLE)
 			continue;
 
 		if (job_can_run(&job, server->avail_resc)) {
+			// check with available resources
 			long fitness = job_fitness(&job, server->avail_resc);
 			if (fitness < best_fit || (fitness == best_fit && server->avail_time < best_server->avail_time)) {
 				best_server = server;
 				best_fit = fitness;
 			}
 		} else if (job_can_run(&job, server->type->max_resc)) {
+			// check with max resources
 			long fitness = job_fitness(&job, server->type->max_resc);
 			if (fitness < type_fit) {
 				best_type = server;
@@ -119,6 +125,7 @@ server_info *best_fit(system_config *config, job_info job) {
 		}
 	}
 
+	// check best_fit has changed
 	if (best_fit < LONG_MAX)
 		return best_server;
 	else
