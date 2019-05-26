@@ -3,6 +3,7 @@
 #define system_config_h_
 
 #include "resource_info.h"
+#include "job_info.h"
 
 #ifdef __cplusplus
 #include "cpp_util.h"
@@ -44,6 +45,8 @@ typedef struct server_info {
 	server_state state; // the current state of this server
 	intmax_t avail_time; // can be -1, meaning "available now" (based on RESC example info from spec)
 	resource_info avail_resc; // the available resources on this server
+	job_info *jobs;
+	size_t num_jobs;
 #ifdef __cplusplus
 	bool update(server_state state, intmax_t time, const resource_info &resc) noexcept;
 	void reset() noexcept;

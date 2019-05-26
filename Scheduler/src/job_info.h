@@ -23,6 +23,7 @@ typedef struct job_info {
 	uintmax_t id; // unique identifier for the job
 	uintmax_t est_runtime; // esimated runtime of the job (milliseconds)
 	resource_info req_resc; // resources required to run the job
+	bool finished;
 #ifdef __cplusplus
 	// whether a job can run on given resources
 	bool can_run(const resource_info &resc) const noexcept;

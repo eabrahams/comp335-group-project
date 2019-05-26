@@ -5,7 +5,7 @@
 #include "system_config.h"
 #include "job_info.h"
 
-typedef enum { ALL_TO_LARGEST, FIRST_FIT, BEST_FIT, WORST_FIT } algorithm_t;
+typedef enum { ALL_TO_LARGEST, FIRST_FIT, BEST_FIT, WORST_FIT, BEST_GUESS } algorithm_t;
 
 //void run_algorithm(socket_client*, server_info*(*alg)(system_config*,server_group*,job_info));
 void run_algorithm(socket_client*, algorithm_t algorithm);

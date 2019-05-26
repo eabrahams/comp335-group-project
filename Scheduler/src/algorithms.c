@@ -185,3 +185,14 @@ server_info *best_fit_old(system_config *config, job_info job) {
 	return best;
 }
 
+server_info *best_guess(system_config *config, job_info job) {
+	size_t i, j;
+	for (i = 0; i < config->num_servers; i++) {
+		for (j = 0; j < config->servers[i].num_jobs; j++) {
+			job_info *running_job = config->servers[i].jobs[j];
+			if (running_job->submit_time + running_job->est_runtime <= job.submit_time)
+				running_job->finished = true;
+		}
+	}
+}
+
