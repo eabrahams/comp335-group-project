@@ -8,6 +8,7 @@
 #include "socket_client.h"
 #include "system_config.h"
 #include "job_info.h"
+#include "list.h"
 
 /* This function does everything each algorithm needs except for choosing the server to
  * run a given job. That task is given to the funtion pointer called 'algorithm' in this
@@ -185,11 +186,22 @@ server_info *best_fit_old(system_config *config, job_info job) {
 	return best;
 }
 
+job_info *get_job_by_id(system_config *config, unsigned long id) {
+	size_t i;
+	for (i = 0; i < config->num_jobs; i++) {
+		if (config->jobs[i].id == id) {
+			return &config->jobs[i];
+		}
+	}
+
+	return NULL;
+}
+
 server_info *best_guess(system_config *config, job_info job) {
 	size_t i, j;
 	for (i = 0; i < config->num_servers; i++) {
-		for (j = 0; j < config->servers[i].num_jobs; j++) {
-			job_info *running_job = config->servers[i].jobs[j];
+		for (node *jobid = config->servers[i].job_id_list; jobid; jobid = jobid->next) {
+			job_info *running_job = get_job_by_id(config, jobid->val);
 			if (running_job->submit_time + running_job->est_runtime <= job.submit_time)
 				running_job->finished = true;
 		}

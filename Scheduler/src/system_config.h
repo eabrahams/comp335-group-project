@@ -20,6 +20,8 @@ extern "C" {
 #include <stdint.h>
 #include "socket_client.h"
 
+#include "list.h"
+
 typedef struct server_type {
 	char *name; // the human-readable name of the server type
 	uintmax_t limit; // the maximum number of concurrent instances of this type
@@ -45,8 +47,7 @@ typedef struct server_info {
 	server_state state; // the current state of this server
 	intmax_t avail_time; // can be -1, meaning "available now" (based on RESC example info from spec)
 	resource_info avail_resc; // the available resources on this server
-	job_info *jobs;
-	size_t num_jobs;
+	struct llist_node *job_id_list;
 #ifdef __cplusplus
 	bool update(server_state state, intmax_t time, const resource_info &resc) noexcept;
 	void reset() noexcept;
@@ -67,6 +68,8 @@ typedef struct system_config {
 	size_t num_types; // number of types
 	server_info *servers; // flat collection of servers, ordered by type then id
 	size_t num_servers; // number of servers
+	job_info *jobs;
+	size_t num_jobs;
 #ifdef __cplusplus
 	const server_type *type_by_name(const char *name) const;
 	server_info *start_of_type(const server_type *type) const;

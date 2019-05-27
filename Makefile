@@ -15,7 +15,7 @@ CXXFLAGS = -std=gnu++11
 .PHONY: all
 all: $(BINARY)
 
-$(BINARY): main.o algorithms.o worst_fit.o socket_client.o system_config.o resource_info.o job_info.o stringhelper.o cpp_util.o -ltinyxml -lpcre2-8
+$(BINARY): main.o algorithms.o worst_fit.o socket_client.o system_config.o resource_info.o job_info.o stringhelper.o cpp_util.o list.o -ltinyxml -lpcre2-8
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
 
 main.o: main.c
@@ -35,6 +35,8 @@ stringhelper.o: stringhelper.c stringhelper.h
 cpp_util.o: cpp_util.cpp cpp_util.h
 
 worst_fit.o: worst_fit.cpp worst_fit.h
+
+list.o: list.c list.h
 
 test: gtest-all.o gtest_main.o system_config.test.o job_info.test.o resource_info.test.o stringhelper.test.o worst_fit.test.o system_config.o job_info.o resource_info.o socket_client.o stringhelper.o cpp_util.o worst_fit.o -ltinyxml -lpcre2-8 -lpthread
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $(TEST) $^
