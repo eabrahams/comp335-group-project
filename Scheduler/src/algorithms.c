@@ -8,7 +8,8 @@
 #include "socket_client.h"
 #include "system_config.h"
 #include "job_info.h"
-#include "list.h"
+#include "llist.h"
+#include "mathhelper.h"
 
 /* This function does everything each algorithm needs except for choosing the server to
  * run a given job. That task is given to the funtion pointer called 'algorithm' in this
@@ -20,6 +21,8 @@ void run_algorithm(socket_client *client, algorithm_t algorithm) {
 	regex_info *job_regex = regex_init(JOB_REGEX); // free this once finished
 
 	system_config *config = parse_config("system.xml"); // need to free
+	config->jobs = NULL;
+	config->num_jobs = 0;
 
 	while (true) {
 		client_send(client, "REDY");
@@ -29,29 +32,37 @@ void run_algorithm(socket_client *client, algorithm_t algorithm) {
 		job_info job = strtojob(resp, job_regex); // do not free
 		free(resp);
 
-		if (!update_config(config, client)) {
-			fprintf(stderr, "unable to updated server information for job %lu\n", job.id);
-		}
+		config->num_jobs++;
+		config->jobs = realloc(config->jobs, config->num_jobs * sizeof *config->jobs);
+		config->jobs[config->num_jobs - 1] = job;
 
 		// needs to be freed
 		//server_group *avail_servers = updated_servers_by_avail(config, client, job.req_resc);
-		server_group *avail_servers;
-		server_info *choice;
-		switch(algorithm) {
-			case ALL_TO_LARGEST:
-				choice = all_to_largest(config, job);
-				break;
-			case FIRST_FIT:
-				choice = first_fit(config, job);
-				break;
-			case BEST_FIT:
-				choice = best_fit(config, job);
-				break;
-			case WORST_FIT:
-				avail_servers = updated_servers_by_avail(config, client, job.req_resc);
-				choice = worst_fit(config, avail_servers, job);
-				free_group(avail_servers);
-				break;
+		server_info *choice = NULL;
+		if (algorithm == BEST_GUESS) {
+			choice = best_guess(config, job);
+			list_push(&choice->job_id_list, job.id);
+		} else {
+			if (!update_config(config, client)) {
+				fprintf(stderr, "unable to updated server information for job %lu\n", job.id);
+			}
+			server_group *avail_servers;
+			switch(algorithm) {
+				case ALL_TO_LARGEST:
+					choice = all_to_largest(config, job);
+					break;
+				case FIRST_FIT:
+					choice = first_fit(config, job);
+					break;
+				case BEST_FIT:
+					choice = best_fit(config, job);
+					break;
+				case WORST_FIT:
+					avail_servers = updated_servers_by_avail(config, client, job.req_resc);
+					choice = worst_fit(config, avail_servers, job);
+					free_group(avail_servers);
+					break;
+			}
 		}
 		//server_info *choice = algorithm(config, avail_servers, job); // do not free
 
@@ -197,14 +208,61 @@ job_info *get_job_by_id(system_config *config, unsigned long id) {
 	return NULL;
 }
 
-server_info *best_guess(system_config *config, job_info job) {
-	size_t i, j;
+void clear_finished_jobs(system_config *config, unsigned long current_time) {
+	size_t i;
 	for (i = 0; i < config->num_servers; i++) {
-		for (node *jobid = config->servers[i].job_id_list; jobid; jobid = jobid->next) {
-			job_info *running_job = get_job_by_id(config, jobid->val);
-			if (running_job->submit_time + running_job->est_runtime <= job.submit_time)
-				running_job->finished = true;
+		node *to_remove, *iter;
+		to_remove = NULL;
+		for (iter = config->servers[i].job_id_list; iter; iter = iter->next) {
+			job_info *running_job = get_job_by_id(config, iter->val);
+			if (running_job->submit_time + running_job->est_runtime <= current_time) {
+				if (!to_remove)
+					to_remove = node_create(iter->val);
+				else
+					list_push(&to_remove, iter->val);
+			}
+		}
+		for (iter = to_remove; iter; iter = iter->next) {
+			list_remove(&config->servers[i].job_id_list, iter->val);
 		}
 	}
 }
+
+server_info *best_guess(system_config *config, job_info job) {
+	clear_finished_jobs(config, job.submit_time);
+
+	long best_fit, type_best_fit;
+	server_info *best_server, *best_type;
+	best_fit = type_best_fit = LONG_MAX;
+	best_server = best_type = NULL;
+	size_t i;
+	for (i = 0; i < config->num_servers; i++) {
+		server_info *current = config->servers[i];
+		resource_info current_resc = current->type->max_resc;
+		node *iter;
+		for (iter = current->job_id_list; iter; iter = iter->next) {
+			job_info *j = get_job_by_id(iter->val);
+			current_resc.cores = max(current_resc.cores - j->req_resc.cores, 0);
+			current_resc.memory = max(current_resc.memory - j->req_resc.memory, 0);
+			current_resc.disk = max(current_resc.disk - j->req_resc.disk, 0);
+		}
+
+		if (job_can_run(&job, current_resc)) {
+			long fitness = job_fitness(&job, current_resc);
+			if (!best_server || fitness < best_fit || (fitness == best_fit && list_length(&current->job_id_list) < list_length(&best_server->job_id_list))) {
+				best_server = current;
+				best_fit = fitness;
+			}
+		} else if (job_can_run(&job, current->type->max_resc)) {
+			long fitness = job_fitness(&job, current->type->max_resc);
+			if (!best_type || fitness < type_best_fit || (fitness == type_best_fit && list_length(&current->job_id_list) < list_length(&best_type->job_id_list))) {
+				best_type = current;
+				type_best_fit = fitness;
+			}
+		}
+	}
+
+	return (best_server != NULL) ? best_server : best_type;
+}
+
 

@@ -20,7 +20,7 @@ extern "C" {
 #include <stdint.h>
 #include "socket_client.h"
 
-#include "list.h"
+#include "llist.h"
 
 typedef struct server_type {
 	char *name; // the human-readable name of the server type
