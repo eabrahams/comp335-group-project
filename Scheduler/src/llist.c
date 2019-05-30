@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
+
 #include "llist.h"
 
 node *node_create(unsigned long value) {
 	node *n = NULL;
 	n = malloc(sizeof *n);
 	if (n == NULL) {
-		fprintf(stderr, "unable to allocate memory for %lu\n", value);
+		fprintf(stderr, "unable to allocate memory for value %lu\n", value);
 		exit(1);
 	}
 	n->val = value;
@@ -16,11 +17,19 @@ node *node_create(unsigned long value) {
 	return n;
 }
 
+node *node_clone(node *n) {
+	return (n != NULL) ? node_create(n->val) : NULL;
+}
+
 void list_push(node **head, unsigned long value) {
-	node *iter = *head;
-	while (iter->next)
-		iter = iter->next;
-	iter->next = node_create(value);
+	if (!*head) {
+		*head = node_create(value);
+	} else {
+		node *iter = *head;
+		while (iter->next)
+			iter = iter->next;
+		iter->next = node_create(value);
+	}
 }
 
 void list_remove(node **head, unsigned long value) {
@@ -34,15 +43,14 @@ void list_remove(node **head, unsigned long value) {
 		return;
 	}
 
-	node *iter = *head;
-	while (iter->next) {
+	node *iter;
+	for (iter = *head; iter->next; iter = iter->next) {
 		if (iter->next->val == value) {
-			tmp = iter->next;
-			iter->next = iter->next->next;
-			free(tmp);
+			tmp = iter->next->next;
+			free(iter->next);
+			iter->next = tmp;
 			break;
 		}
-		iter = iter->next;
 	}
 }
 
@@ -77,6 +85,12 @@ void list_remove_at(node **head, size_t index) {
 	}
 }
 
+void list_remove_from(node **head, node **other) {
+	node *iter;
+	for (iter = *other; iter; iter = iter->next)
+		list_remove(head, iter->val);
+}
+
 bool list_contains(node **head, unsigned long value) {
 	node *iter;
 	for (iter = *head; iter; iter = iter->next)
@@ -103,6 +117,10 @@ size_t list_count(node **head, unsigned long value) {
 }
 
 unsigned long list_pop(node **head) {
+	if (!*head) {
+		fprintf(stderr, "cannot pop: head is null\n");
+		exit(1);
+	}
 	unsigned long value = (*head)->val;
 	node *tmp = *head;
 	*head = (*head)->next;
@@ -111,15 +129,17 @@ unsigned long list_pop(node **head) {
 }
 
 unsigned long list_at(node **head, size_t index) {
+	if (!*head) {
+		fprintf(stderr, "cannot access %lu: head is null\n", index);
+		exit(1);
+	}
 	size_t counter = 0;
 	node *iter = *head;
-	while (counter < index) {
+	while (counter++ < index)
 		if (iter->next)
 			iter = iter->next;
 		else
 			break;
-		counter++;
-	}
 
 	return iter->val;
 }
@@ -144,29 +164,66 @@ void list_clear(node **head) {
 }
 
 void list_insert(node **head, size_t index, unsigned long value) {
+	if (!*head) {
+		fprintf(stderr, "cannot insert %lu to %lu: head is null\n", value, index);
+		exit(1);
+	}
 	size_t counter = 0;
 	node *iter = *head;
-	while (counter < index - 1) {
+	while (counter++ < index - 1)
 		if (iter->next)
 			iter = iter->next;
 		else
 			break;
-		counter++;
-	}
 
 	node *tmp = iter->next;
 	iter->next = node_create(value);
 	iter->next->next = tmp;
 }
 
-void list_to_ptr(node **head, unsigned long **ptr, size_t *size) {
-	*ptr = NULL;
-	*size = 0;
-	node *iter;
-	for (iter = *head; iter; iter = iter->next) {
-		(*size)++;
-		*ptr = realloc(*ptr, sizeof **ptr * *size);
-		*(*ptr + (*size - 1)) = iter->val;
+void list_concat(node **head, node **other) {
+	node *iter = *head;
+	while (iter->next)
+		iter = iter->next;
+	iter->next = *other;
+}
+
+node *list_clone(node **head) {
+	if (!*head)
+		return NULL;
+
+	node *newhead, *curiter, *newiter;
+	newhead = node_create((*head)->val);
+	curiter = (*head)->next;
+	newiter = newhead;
+	while (curiter) {
+		newiter->next = node_clone(curiter);
+		curiter = curiter->next;
+		newiter = newiter->next;
 	}
+
+	return newhead;
+}
+
+void list_reverse(node **head) {
+	node *newhead, *iter, *tmp;
+	newhead = *head;
+	iter = (*head)->next;
+	while (iter) {
+		tmp = iter;
+		iter = iter->next;
+		tmp->next = newhead;
+		newhead = tmp;
+	}
+
+	*head = newhead;
+}
+
+void list_to_ptr(node **head, unsigned long **ptr, size_t *size) {
+	*size = list_length(head);
+	*ptr = malloc(sizeof **ptr * *size);
+	unsigned long *value = *ptr;
+	for (node *iter = *head; iter; iter = iter->next)
+		*(value++) = iter->val;
 }
 

@@ -231,7 +231,7 @@ void clear_finished_jobs(system_config *config, unsigned long current_time) {
 server_info *best_guess(system_config *config, job_info job) {
 	clear_finished_jobs(config, job.submit_time);
 
-	long best_fit, type_best_fit;
+	long best_fit, type_best_fit, fitness;
 	server_info *best_server, *best_type;
 	best_fit = type_best_fit = LONG_MAX;
 	best_server = best_type = NULL;
@@ -248,13 +248,13 @@ server_info *best_guess(system_config *config, job_info job) {
 		}
 
 		if (job_can_run(&job, current_resc)) {
-			long fitness = job_fitness(&job, current_resc);
+			fitness = job_fitness(&job, current_resc);
 			if (!best_server || fitness < best_fit || (fitness == best_fit && list_length(&current->job_id_list) < list_length(&best_server->job_id_list))) {
 				best_server = current;
 				best_fit = fitness;
 			}
 		} else if (job_can_run(&job, current->type->max_resc)) {
-			long fitness = job_fitness(&job, current->type->max_resc);
+			fitness = job_fitness(&job, current->type->max_resc);
 			if (!best_type || fitness < type_best_fit || (fitness == type_best_fit && list_length(&current->job_id_list) < list_length(&best_type->job_id_list))) {
 				best_type = current;
 				type_best_fit = fitness;
