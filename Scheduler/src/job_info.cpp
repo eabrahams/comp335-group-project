@@ -32,3 +32,11 @@ intmax_t job_fitness(const job_info *job, const resource_info resc) noexcept {
 		return std::numeric_limits<intmax_t>::min();
 	}
 };
+
+job_info *job_by_id(job_info *jobs, size_t num_jobs, uintmax_t id) {
+	size_t i;
+	for (i = 0; i < num_jobs; i++)
+		if (jobs[i].id == id)
+			return &jobs[i];
+	return NULL;
+}

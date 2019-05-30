@@ -38,6 +38,8 @@ bool job_can_run(const job_info *job, const resource_info resc) noexcept;
 // the fitness for a job on given resources, wraps job_info.fitness
 intmax_t job_fitness(const job_info *job, const resource_info resc) noexcept;
 
+job_info *job_by_id(job_info *jobs, size_t num_jobs, uintmax_t id);
+
 #ifdef __cplusplus
 #ifdef EXTERN_C_job_info_h_
 }

@@ -197,6 +197,7 @@ server_info *best_fit_old(system_config *config, job_info job) {
 	return best;
 }
 
+/*
 job_info *get_job_by_id(system_config *config, unsigned long id) {
 	size_t i;
 	for (i = 0; i < config->num_jobs; i++) {
@@ -207,6 +208,7 @@ job_info *get_job_by_id(system_config *config, unsigned long id) {
 
 	return NULL;
 }
+*/
 
 void clear_finished_jobs(system_config *config, unsigned long current_time) {
 	size_t i;
@@ -214,7 +216,7 @@ void clear_finished_jobs(system_config *config, unsigned long current_time) {
 		node *to_remove, *iter;
 		to_remove = NULL;
 		for (iter = config->servers[i].job_id_list; iter; iter = iter->next) {
-			job_info *running_job = get_job_by_id(config, iter->val);
+			job_info *running_job = job_by_id(config->jobs, config->num_jobs, iter->val);
 			if (running_job->submit_time + running_job->est_runtime <= current_time) {
 				if (!to_remove)
 					to_remove = node_create(iter->val);
