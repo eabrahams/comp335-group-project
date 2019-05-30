@@ -222,9 +222,7 @@ void clear_finished_jobs(system_config *config, unsigned long current_time) {
 					list_push(&to_remove, iter->val);
 			}
 		}
-		for (iter = to_remove; iter; iter = iter->next) {
-			list_remove(&config->servers[i].job_id_list, iter->val);
-		}
+		list_remove_from(&config->servers[i].job_id_list, &to_remove);
 	}
 }
 
