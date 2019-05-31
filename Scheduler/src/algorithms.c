@@ -247,9 +247,12 @@ server_info *best_guess(system_config *config, job_info job) {
 		for (iter = current->job_id_list; iter; iter = iter->next) {
 			//job_info *j = get_job_by_id(iter->val);
 			job_info *j = job_by_id(config->jobs, config->num_jobs, iter->val);
-			current_resc.cores = max(current_resc.cores - j->req_resc.cores, 0U);
-			current_resc.memory = max(current_resc.memory - j->req_resc.memory, 0U);
-			current_resc.disk = max(current_resc.disk - j->req_resc.disk, 0U);
+			//current_resc.cores = max(current_resc.cores - j->req_resc.cores, 0UL);
+			//current_resc.memory = max(current_resc.memory - j->req_resc.memory, 0UL);
+			//current_resc.disk = max(current_resc.disk - j->req_resc.disk, 0UL);
+			current_resc.cores = ge_zero(current_resc.cores - j->req_resc.cores);
+			current_resc.memory = ge_zero(current_resc.memory - j->req_resc.memory);
+			current_resc.disk = ge_zero(current_resc.disk - j->req_resc.disk);
 		}
 
 		if (job_can_run(&job, current_resc)) {

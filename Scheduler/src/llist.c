@@ -21,7 +21,7 @@ node *node_clone(node *n) {
 	return (n != NULL) ? node_create(n->val) : NULL;
 }
 
-void list_push(node **head, unsigned long value) {
+void list_add(node **head, unsigned long value) {
 	if (!*head) {
 		*head = node_create(value);
 	} else {
@@ -30,6 +30,12 @@ void list_push(node **head, unsigned long value) {
 			iter = iter->next;
 		iter->next = node_create(value);
 	}
+}
+
+void list_push(node **head, unsigned long value) {
+	node *tmp = node_create(value);
+	tmp->next = *head;
+	*head = tmp;
 }
 
 void list_remove(node **head, unsigned long value) {

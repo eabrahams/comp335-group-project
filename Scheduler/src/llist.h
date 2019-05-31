@@ -10,6 +10,7 @@ typedef struct llist_node {
 
 node *node_create(unsigned long value);
 node *node_clone(node *n);
+void list_add(node **head, unsigned long value);
 void list_push(node **head, unsigned long value);
 void list_remove(node **head, unsigned long value);
 void list_remove_all(node **head, unsigned long value);

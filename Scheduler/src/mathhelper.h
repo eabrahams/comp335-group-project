@@ -11,6 +11,11 @@
 		__typeof__ (min_y) _min_y = (min_y); \
 		_min_x < _min_y ? _min_x : _min_y; })
 
+#define ge_zero(ge_zero_val) ({ \
+		__typeof__ (ge_zero_val) _ge_zero_val = (ge_zero_val); \
+		__typeof__ (ge_zero_val) _zero = 0; \
+		_ge_zero_val > _zero ? _ge_zero_val : _zero; })
+
 #define difference(diff_x,diff_y) ({ \
 		__typeof__ (diff_x) _diff_x = (diff_x); \
 		__typeof__ (diff_y) _diff_y = (diff_y); \
@@ -36,6 +41,16 @@
 			_result += (arr[_index]); \
 		} \
 		_result / (__typeof__ (_result)) _size; })
+
+#define dpow(dpow_x, dpow_y) ({ \
+		__typeof__ (dpow_x) _dpow_x = (dpow_x); \
+		__typeof__ (dpow_y) _dpow_y = (dpow_y); \
+		__typeof__ (dpow_x) _dpow_result = 0; \
+		__typeof__ (dpow_y) _dpow_index; \
+		for (_index = 0; _index < _y; _index++) { \
+			_result += _dpow_x \
+		} \
+		_result == 0 ? 1 : _result; })
 
 #include <stdbool.h>
 
