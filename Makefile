@@ -12,10 +12,13 @@ CFLAGS = -std=gnu11 -Wall -Wextra
 CXX = g++
 CXXFLAGS = -std=gnu++11
 
-.PHONY: all
+.PHONY: all pull
 all: $(BINARY)
 
-$(BINARY): main.o algorithms.o worst_fit.o socket_client.o system_config.o resource_info.o job_info.o stringhelper.o cpp_util.o llist.o -ltinyxml -lpcre2-8
+pull:
+	@git pull > /dev/null
+
+$(BINARY): main.o algorithms.o worst_fit.o socket_client.o system_config.o resource_info.o job_info.o stringhelper.o cpp_util.o llist.o -ltinyxml -lpcre2-8 -lm
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
 
 main.o: main.c

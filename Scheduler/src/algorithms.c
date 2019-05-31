@@ -259,6 +259,8 @@ server_info *best_guess(system_config *config, job_info job) {
 			//current_resc.cores = max(current_resc.cores - j->req_resc.cores, 0UL);
 			//current_resc.memory = max(current_resc.memory - j->req_resc.memory, 0UL);
 			//current_resc.disk = max(current_resc.disk - j->req_resc.disk, 0UL);
+
+			/* TODO: unsigned subtraction not good */
 			current_resc.cores = ge_zero(current_resc.cores - j->req_resc.cores);
 			current_resc.memory = ge_zero(current_resc.memory - j->req_resc.memory);
 			current_resc.disk = ge_zero(current_resc.disk - j->req_resc.disk);

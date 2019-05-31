@@ -26,6 +26,8 @@ int main(int argc, char **argv) {
 					else if (strcmp(argv[i], "wf") == 0)
 						a = WORST_FIT;
 						//algorithm = &worst_fit;
+					else if (strcmp(argv[i], "bg") == 0)
+						a = BEST_GUESS;
 					else
 						fprintf(stderr, "algorithm not implemented: %s\n", argv[i]);
 					break;
