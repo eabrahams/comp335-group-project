@@ -62,6 +62,10 @@ void run_algorithm(socket_client *client, algorithm_t algorithm) {
 					choice = worst_fit(config, avail_servers, job);
 					free_group(avail_servers);
 					break;
+				default:
+					fprintf(stderr, "warning: impossible branch for job %lu\n", job.id);
+					exit(1);
+					break;
 			}
 		}
 		//server_info *choice = algorithm(config, avail_servers, job); // do not free
@@ -237,14 +241,15 @@ server_info *best_guess(system_config *config, job_info job) {
 	best_server = best_type = NULL;
 	size_t i;
 	for (i = 0; i < config->num_servers; i++) {
-		server_info *current = config->servers[i];
+		server_info *current = &config->servers[i];
 		resource_info current_resc = current->type->max_resc;
 		node *iter;
 		for (iter = current->job_id_list; iter; iter = iter->next) {
-			job_info *j = get_job_by_id(iter->val);
-			current_resc.cores = max(current_resc.cores - j->req_resc.cores, 0);
-			current_resc.memory = max(current_resc.memory - j->req_resc.memory, 0);
-			current_resc.disk = max(current_resc.disk - j->req_resc.disk, 0);
+			//job_info *j = get_job_by_id(iter->val);
+			job_info *j = job_by_id(config->jobs, config->num_jobs, iter->val);
+			current_resc.cores = max(current_resc.cores - j->req_resc.cores, 0U);
+			current_resc.memory = max(current_resc.memory - j->req_resc.memory, 0U);
+			current_resc.disk = max(current_resc.disk - j->req_resc.disk, 0U);
 		}
 
 		if (job_can_run(&job, current_resc)) {

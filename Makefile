@@ -7,9 +7,9 @@ BINARY = ds-client
 
 TEST = gtest-runner
 
-CC = clang
-CFLAGS = -std=gnu11 -Wall -Wextra -pedantic
-CXX = clang++
+CC = gcc
+CFLAGS = -std=gnu11 -Wall -Wextra
+CXX = g++
 CXXFLAGS = -std=gnu++11
 
 .PHONY: all

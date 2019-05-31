@@ -12,6 +12,8 @@ void run_algorithm(socket_client*, algorithm_t algorithm);
 server_info *all_to_largest(system_config*, job_info);
 server_info *first_fit(system_config*, job_info);
 server_info *best_fit(system_config*, job_info);
+server_info *best_guess(system_config*, job_info);
+void clear_finished_jobs(system_config*,unsigned long);
 extern server_info *worst_fit(system_config*, server_group*, job_info);
 
 #endif
