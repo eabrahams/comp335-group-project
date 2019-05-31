@@ -24,6 +24,10 @@ void run_algorithm(socket_client *client, algorithm_t algorithm) {
 	config->jobs = NULL;
 	config->num_jobs = 0;
 
+	size_t i;
+	for (i = 0; i < config->num_servers; i++)
+		config->servers[i].job_id_list = NULL;
+
 	while (true) {
 		client_send(client, "REDY");
 		char *resp = client_receive(client); // need to free
@@ -81,6 +85,11 @@ void run_algorithm(socket_client *client, algorithm_t algorithm) {
 		if (!success)
 			break;
 	}
+	if (config->jobs)
+		free(config->jobs);
+
+	for (i = 0; i < config->num_servers; i++)
+		list_clear(&config->servers[i].job_id_list);
 
 	client_send(client, "QUIT");
 	free_config(config);

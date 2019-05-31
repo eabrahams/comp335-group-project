@@ -29,5 +29,6 @@ void list_concat(node **head, node **other);
 node *list_clone(node **head);
 void list_reverse(node **head);
 void list_to_ptr(node **head, unsigned long **ptr, size_t *size);
+node *ptr_to_list(unsigned long *ptr, size_t size);
 
 #endif

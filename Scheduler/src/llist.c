@@ -229,7 +229,23 @@ void list_to_ptr(node **head, unsigned long **ptr, size_t *size) {
 	*size = list_length(head);
 	*ptr = malloc(sizeof **ptr * *size);
 	unsigned long *value = *ptr;
-	for (node *iter = *head; iter; iter = iter->next)
+	node *iter;
+	for (iter = *head; iter; iter = iter->next)
 		*(value++) = iter->val;
+}
+
+node *ptr_to_list(unsigned long *ptr, size_t size) {
+	if (size == 0 || !ptr)
+		return NULL;
+	node *head, *iter;
+	head = node_create(*ptr);
+	iter = head;
+	size_t i;
+	for (i = 1; i < size; i++) {
+		iter->next = node_create(ptr[i]);
+		iter = iter->next;
+	}
+
+	return head;
 }
 
