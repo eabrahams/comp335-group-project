@@ -41,7 +41,7 @@ void list_push(node **head, unsigned long value) {
 void list_remove(node **head, unsigned long value) {
 	if (!*head)
 		return;
-	node *tmp;
+	node *tmp = NULL;
 	if ((*head)->val == value) {
 		tmp = (*head)->next;
 		free(*head);
@@ -49,7 +49,7 @@ void list_remove(node **head, unsigned long value) {
 		return;
 	}
 
-	node *iter;
+	node *iter = NULL;
 	for (iter = *head; iter->next; iter = iter->next) {
 		if (iter->next->val == value) {
 			tmp = iter->next->next;
